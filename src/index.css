@@ -2,103 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Definition of the design system - converted from OKLCH to HSL for compatibility */
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 20 14% 4%;
-
+    --foreground: 0 0% 14.5%;
     --card: 0 0% 100%;
-    --card-foreground: 20 14% 4%;
-
+    --card-foreground: 0 0% 14.5%;
     --popover: 0 0% 100%;
-    --popover-foreground: 20 14% 4%;
-
-    --primary: 15 86% 55%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 30 100% 96%;
-    --secondary-foreground: 20 14% 4%;
-
-    --muted: 20 20% 96%;
-    --muted-foreground: 20 5% 45%;
-
-    --accent: 25 95% 53%;
-    --accent-foreground: 0 0% 100%;
-
+    --popover-foreground: 0 0% 14.5%;
+    --primary: 0 0% 20.5%;
+    --primary-foreground: 0 0% 98.5%;
+    --secondary: 0 0% 97%;
+    --secondary-foreground: 0 0% 20.5%;
+    --muted: 0 0% 97%;
+    --muted-foreground: 0 0% 55.6%;
+    --accent: 0 0% 97%;
+    --accent-foreground: 0 0% 20.5%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 20 20% 90%;
-    --input: 20 20% 90%;
-    --ring: 15 86% 55%;
-
-    --radius: 0.75rem;
-
-    /* Custom design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(15 86% 55%) 0%, hsl(25 95% 53%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(15 86% 55% / 0.1) 0%, hsl(25 95% 53% / 0.05) 100%);
-    --shadow-soft: 0 2px 8px hsl(15 86% 55% / 0.08);
-    --shadow-medium: 0 4px 16px hsl(15 86% 55% / 0.12);
-    --shadow-strong: 0 8px 24px hsl(15 86% 55% / 0.16);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 0 0% 92.2%;
+    --input: 0 0% 92.2%;
+    --ring: 0 0% 70.8%;
+    --chart-1: 41 100% 64.6%;
+    --chart-2: 185 50% 60%;
+    --chart-3: 227 35% 39.8%;
+    --chart-4: 84 80% 82.8%;
+    --chart-5: 70 80% 76.9%;
+    --radius: 0.625rem;
   }
 
   .dark {
-    --background: 20 14% 4%;
-    --foreground: 0 0% 98%;
-
-    --card: 20 10% 8%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 20 10% 8%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 15 86% 55%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 20 10% 15%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 20 10% 15%;
-    --muted-foreground: 20 5% 65%;
-
-    --accent: 25 95% 53%;
-    --accent-foreground: 0 0% 100%;
-
+    --background: 0 0% 14.5%;
+    --foreground: 0 0% 98.5%;
+    --card: 0 0% 14.5%;
+    --card-foreground: 0 0% 98.5%;
+    --popover: 0 0% 14.5%;
+    --popover-foreground: 0 0% 98.5%;
+    --primary: 0 0% 98.5%;
+    --primary-foreground: 0 0% 20.5%;
+    --secondary: 0 0% 26.9%;
+    --secondary-foreground: 0 0% 98.5%;
+    --muted: 0 0% 26.9%;
+    --muted-foreground: 0 0% 70.8%;
+    --accent: 0 0% 26.9%;
+    --accent-foreground: 0 0% 98.5%;
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 20 10% 20%;
-    --input: 20 10% 20%;
-    --ring: 15 86% 55%;
-
-    --gradient-primary: linear-gradient(135deg, hsl(15 86% 55%) 0%, hsl(25 95% 53%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(15 86% 55% / 0.15) 0%, hsl(25 95% 53% / 0.08) 100%);
-    --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.3);
-    --shadow-medium: 0 4px 16px hsl(0 0% 0% / 0.4);
-    --shadow-strong: 0 8px 24px hsl(0 0% 0% / 0.5);
-
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 0 0% 26.9%;
+    --input: 0 0% 26.9%;
+    --ring: 0 0% 43.9%;
+    --chart-1: 264 76% 48.8%;
+    --chart-2: 162 70% 69.6%;
+    --chart-3: 70 80% 76.9%;
+    --chart-4: 304 80% 62.7%;
+    --chart-5: 16 80% 64.5%;
   }
 }
 

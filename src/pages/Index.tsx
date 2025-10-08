@@ -1,21 +1,32 @@
-import { Navbar } from "@/components/Navbar";
-import { Hero } from "@/components/Hero";
-import { CategoryFilter } from "@/components/CategoryFilter";
-import { RestaurantGrid } from "@/components/RestaurantGrid";
-import { Footer } from "@/components/Footer";
+import { useAuth } from "@/contexts/auth-context"
+import { ProtectedRoute } from "@/components/auth/protected-route"
+import { Header } from "@/components/layout/header"
+import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
-const Index = () => {
+export default function HomePage() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (user) {
+      if (user.role === "admin") {
+        navigate("/admin")
+      } else {
+        navigate("/customer")
+      }
+    }
+  }, [user, navigate])
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-1">
-        <Hero />
-        <CategoryFilter />
-        <RestaurantGrid />
+    <ProtectedRoute>
+      <Header />
+      <main className="container mx-auto p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Redirecting...</p>
+        </div>
       </main>
-      <Footer />
-    </div>
-  );
-};
-
-export default Index;
+    </ProtectedRoute>
+  )
+}
