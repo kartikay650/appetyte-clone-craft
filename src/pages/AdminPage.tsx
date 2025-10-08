@@ -1,3 +1,4 @@
+import React from "react"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { Header } from "@/components/layout/header"
 import { AdminDashboard } from "@/components/admin/admin-dashboard"

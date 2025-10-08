@@ -1,3 +1,4 @@
+import React from "react"
 import { ProtectedRoute } from "@/components/auth/protected-route"
 import { Header } from "@/components/layout/header"
 import { CustomerDashboard } from "@/components/customer/customer-dashboard"
