@@ -1,5 +1,4 @@
-import type React from "react"
-import { createContext, useContext, useState, useEffect } from "react"
+import React, { createContext, useContext, useState, useEffect } from "react"
 import type { AuthUser } from "@/lib/types"
 import { dataStore } from "@/lib/data-store"
 
