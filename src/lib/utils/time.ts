@@ -15,7 +15,7 @@ export function getCurrentDate(): string {
 export function formatTime(timeString: string): string {
   const [hours, minutes] = timeString.split(":")
   const time = new Date()
-  time.setHours(parseInt(hours), parseInt(minutes))
+  time.setHours(Number.parseInt(hours), Number.parseInt(minutes))
 
   return time.toLocaleTimeString("en-IN", {
     hour: "2-digit",
@@ -61,57 +61,87 @@ export function getTimeUntilCutoff(cutoffTime: string): string {
   return `${minutesLeft}m left`
 }
 
-export type MealType = "breakfast" | "lunch" | "dinner"
-
-export function getNextMealTime(): { mealType: MealType; timeLeft: string } | null {
+export function getMealTimeStatus(
+  cutoffTime: string,
+  mealDate: string,
+): {
+  status: "open" | "closing_soon" | "closed"
+  timeLeft: string
+  urgency: "normal" | "warning" | "urgent"
+} {
   const now = new Date()
-  const currentHour = now.getHours()
-  const currentMinute = now.getMinutes()
+  const today = now.toISOString().split("T")[0]
 
-  const mealTimes = [
-    { type: "breakfast" as MealType, cutoff: "08:30" },
-    { type: "lunch" as MealType, cutoff: "11:00" },
-    { type: "dinner" as MealType, cutoff: "17:00" },
-  ]
-
-  for (const meal of mealTimes) {
-    const [hours, minutes] = meal.cutoff.split(":").map(Number)
-    if (currentHour < hours || (currentHour === hours && currentMinute < minutes)) {
-      return {
-        mealType: meal.type,
-        timeLeft: getTimeUntilCutoff(meal.cutoff),
-      }
+  // Check if meal is for today
+  if (mealDate !== today) {
+    return {
+      status: "closed",
+      timeLeft: mealDate < today ? "Past date" : "Future date",
+      urgency: "normal",
     }
   }
 
-  return null
-}
-
-export function getMealTimeStatus(cutoffTime: string): "open" | "closing_soon" | "closed" {
-  const now = new Date()
   const [hours, minutes] = cutoffTime.split(":").map(Number)
   const cutoff = new Date()
   cutoff.setHours(hours, minutes, 0, 0)
 
-  if (now >= cutoff) return "closed"
+  if (now >= cutoff) {
+    return {
+      status: "closed",
+      timeLeft: "Ordering closed",
+      urgency: "normal",
+    }
+  }
 
   const diff = cutoff.getTime() - now.getTime()
-  const minutesLeft = Math.floor(diff / (1000 * 60))
+  const hoursLeft = Math.floor(diff / (1000 * 60 * 60))
+  const minutesLeft = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
 
-  if (minutesLeft <= 30) return "closing_soon"
-  return "open"
+  let timeLeft: string
+  let urgency: "normal" | "warning" | "urgent" = "normal"
+
+  if (hoursLeft > 0) {
+    timeLeft = `${hoursLeft}h ${minutesLeft}m left`
+    if (hoursLeft === 1) urgency = "warning"
+  } else {
+    timeLeft = `${minutesLeft}m left`
+    if (minutesLeft <= 15) urgency = "urgent"
+    else if (minutesLeft <= 30) urgency = "warning"
+  }
+
+  return {
+    status: urgency === "urgent" ? "closing_soon" : "open",
+    timeLeft,
+    urgency,
+  }
 }
 
-export function formatTimeAgo(timestamp: string): string {
+export function getNextMealTime(): { mealType: string; cutoffTime: string } | null {
   const now = new Date()
-  const past = new Date(timestamp)
-  const diffMs = now.getTime() - past.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMins / 60)
-  const diffDays = Math.floor(diffHours / 24)
+  const currentHour = now.getHours()
+  const currentMinute = now.getMinutes()
+  const currentTime = currentHour * 60 + currentMinute
 
-  if (diffDays > 0) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`
-  if (diffHours > 0) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`
-  if (diffMins > 0) return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`
-  return "Just now"
+  // Define meal cutoff times in minutes from midnight
+  const mealTimes = [
+    { mealType: "breakfast", cutoffTime: "08:30", cutoffMinutes: 8 * 60 + 30 },
+    { mealType: "lunch", cutoffTime: "11:00", cutoffMinutes: 11 * 60 },
+    { mealType: "dinner", cutoffTime: "17:00", cutoffMinutes: 17 * 60 },
+  ]
+
+  // Find next meal cutoff
+  for (const meal of mealTimes) {
+    if (currentTime < meal.cutoffMinutes) {
+      return {
+        mealType: meal.mealType,
+        cutoffTime: meal.cutoffTime,
+      }
+    }
+  }
+
+  // If all meals for today are over, return tomorrow's breakfast
+  return {
+    mealType: "breakfast",
+    cutoffTime: "08:30",
+  }
 }
