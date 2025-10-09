@@ -51,15 +51,17 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">Appetyte</CardTitle>
-        <CardDescription className="text-center">Login with your mobile number</CardDescription>
+    <Card className="w-full max-w-sm sm:max-w-md mx-auto">
+      <CardHeader className="text-center px-4 sm:px-6">
+        <CardTitle className="text-xl sm:text-2xl font-bold text-primary">Appetyte</CardTitle>
+        <CardDescription className="text-sm">Enter your mobile number to continue</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 sm:px-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="mobile">Mobile Number</Label>
+            <Label htmlFor="mobile" className="text-sm">
+              Mobile Number
+            </Label>
             <Input
               id="mobile"
               type="tel"
@@ -68,13 +70,27 @@ export function LoginForm() {
               onChange={(e) => setMobileNumber(e.target.value)}
               maxLength={10}
               required
+              className="text-base" // Prevents zoom on iOS
             />
-            <p className="text-sm text-muted-foreground">Demo: 9876543210 (Customer) or 9876543212 (Admin)</p>
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading} size="sm">
             {isLoading ? "Logging in..." : "Login"}
           </Button>
         </form>
+        <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-muted rounded-lg">
+          <p className="text-xs sm:text-sm font-medium mb-2">Demo Accounts:</p>
+          <div className="space-y-1 text-xs">
+            <p>
+              <strong>Customer:</strong> 9876543210 (Priya)
+            </p>
+            <p>
+              <strong>Customer:</strong> 9876543211 (Rahul)
+            </p>
+            <p>
+              <strong>Admin:</strong> 9876543212 (Anita Aunty)
+            </p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   )
