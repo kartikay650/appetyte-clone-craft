@@ -1,5 +1,10 @@
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { MealManagement } from "./meal-management"
+import { OrderManagement } from "./order-management"
+import { CustomerManagement } from "./customer-management"
+import { ReportsOverview } from "./reports-overview"
+import { TimeStatusWidget } from "./time-status-widget"
 import { dataStore } from "@/lib/data-store"
 import type { Order, User, Meal } from "@/lib/types"
 
@@ -21,32 +26,34 @@ export function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold text-balance">Admin Dashboard</h1>
         <p className="text-muted-foreground">Manage your tiffin service business</p>
       </div>
 
+      <TimeStatusWidget />
+
       <Tabs defaultValue="orders" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="orders">Orders ({orders.length})</TabsTrigger>
-          <TabsTrigger value="meals">Meals ({meals.length})</TabsTrigger>
-          <TabsTrigger value="customers">Customers ({customers.length})</TabsTrigger>
+          <TabsTrigger value="orders">Orders</TabsTrigger>
+          <TabsTrigger value="meals">Meals</TabsTrigger>
+          <TabsTrigger value="customers">Customers</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders">
-          <p className="text-center py-8">Order management - Feature coming soon</p>
+          <OrderManagement orders={orders} onOrderUpdate={loadData} />
         </TabsContent>
 
         <TabsContent value="meals">
-          <p className="text-center py-8">Meal management - Feature coming soon</p>
+          <MealManagement meals={meals} onMealUpdate={loadData} />
         </TabsContent>
 
         <TabsContent value="customers">
-          <p className="text-center py-8">Customer management - Feature coming soon</p>
+          <CustomerManagement customers={customers} onCustomerUpdate={loadData} />
         </TabsContent>
 
         <TabsContent value="reports">
-          <p className="text-center py-8">Reports - Feature coming soon</p>
+          <ReportsOverview orders={orders} customers={customers} meals={meals} />
         </TabsContent>
       </Tabs>
     </div>
