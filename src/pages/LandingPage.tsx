@@ -36,42 +36,53 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-6 md:px-12 lg:px-24 py-20 md:py-32">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              Everything you need to simplify your{" "}
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                tiffin orders
-              </span>
+      <section className="relative overflow-hidden bg-gradient-to-br from-orange-100 via-yellow-50 to-amber-100">
+        <div className="container mx-auto px-6 md:px-12 lg:px-24 py-20 md:py-32">
+          <div className="max-w-5xl mx-auto text-center space-y-8 animate-fade-in">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-foreground text-background px-4 py-1.5 rounded-full text-sm font-medium">
+              <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-bold">NEW</span>
+              <span>Weekly meal plans + auto-reminders</span>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight" style={{ color: '#1a0b2e' }}>
+              The Tiffin Management System
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground">
-              Appetyte helps tiffin providers manage orders, send weekly payment reminders, 
-              and track customer balances — all in one place.
+
+            {/* Subtext */}
+            <p className="text-xl md:text-2xl text-foreground/80 max-w-4xl mx-auto leading-relaxed">
+              Orders, payments, reminders, customer tracking—it's all here. Ditch the spreadsheets and WhatsApp chaos and manage your{" "}
+              <span className="font-semibold">tiffin service</span>, <span className="font-semibold">meal delivery</span>, <span className="font-semibold">home kitchen</span>, or <span className="font-semibold">catering business</span> using one simple platform.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base font-semibold px-8 py-6 h-auto rounded-lg shadow-lg">
                 Get Started Free
-                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" className="bg-white border-2 border-foreground/20 hover:bg-white/80 text-base font-semibold px-8 py-6 h-auto rounded-lg">
                 See How It Works
               </Button>
             </div>
-          </div>
-          <div className="hidden md:block animate-scale-in">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-3xl"></div>
-              <div className="relative bg-card border rounded-2xl shadow-2xl p-8">
-                <div className="space-y-4">
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
-                  <div className="h-4 bg-muted rounded w-1/2"></div>
-                  <div className="grid grid-cols-2 gap-4 pt-4">
-                    <div className="h-24 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg"></div>
-                    <div className="h-24 bg-gradient-to-br from-secondary/10 to-secondary/5 rounded-lg"></div>
-                  </div>
-                  <div className="h-32 bg-muted/50 rounded-lg"></div>
-                </div>
+
+            {/* Integration Text */}
+            <div className="pt-8">
+              <div className="flex items-center justify-center gap-2 text-foreground/70 mb-6">
+                <span className="text-sm font-medium">Perfect for home chefs, tiffin services, and meal prep businesses</span>
+                <a href="#features" className="text-sm font-semibold text-foreground hover:text-primary transition-colors inline-flex items-center gap-1">
+                  View all
+                  <ArrowRight className="h-3 w-3" />
+                </a>
+              </div>
+
+              {/* Integration Icons */}
+              <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap opacity-60">
+                <Calendar className="h-8 w-8 md:h-10 md:w-10" />
+                <Users className="h-8 w-8 md:h-10 md:w-10" />
+                <DollarSign className="h-8 w-8 md:h-10 md:w-10" />
+                <FileText className="h-8 w-8 md:h-10 md:w-10" />
+                <CheckCircle2 className="h-8 w-8 md:h-10 md:w-10" />
               </div>
             </div>
           </div>
