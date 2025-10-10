@@ -15,6 +15,8 @@ export default function HomePage() {
       } else {
         navigate("/customer")
       }
+    } else {
+      navigate("/")
     }
   }, [user, navigate])
 
