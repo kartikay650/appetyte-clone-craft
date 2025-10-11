@@ -36,55 +36,81 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#fef3e2] via-[#fef7e8] to-[#fffbf0]">
-        <div className="mx-auto px-6 md:px-12 lg:px-24 py-16 md:py-24">
-          <div className="max-w-5xl mx-auto text-center space-y-6 animate-fade-in">
+      <section className="relative overflow-hidden" style={{
+        background: 'radial-gradient(ellipse at top center, #FFD88D 0%, #FFEAC4 30%, #FFF5E1 60%, #FFFBF5 100%)'
+      }}>
+        <div className="mx-auto px-6 md:px-12 lg:px-20 xl:px-32 py-12 md:py-20 lg:py-24">
+          <div className="max-w-4xl mx-auto text-center space-y-5 animate-fade-in">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 rounded-full text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
               <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-[10px] font-bold">NEW</span>
               <span>Weekly meal plans + auto-reminders</span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight" style={{ color: '#1a0b2e' }}>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight px-4" style={{ color: '#1a0b2e' }}>
               The Tiffin Management System
             </h1>
 
             {/* Subtext */}
-            <p className="text-lg md:text-xl text-foreground/70 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-foreground/70 max-w-3xl mx-auto leading-relaxed font-normal px-4">
               Orders, payments, reminders, customer tracking—it's all here. Ditch the spreadsheets and WhatsApp chaos and manage your{" "}
               <span className="font-semibold">tiffin service</span>, <span className="font-semibold">meal delivery</span>, <span className="font-semibold">home kitchen</span>, or <span className="font-semibold">catering business</span> using one simple platform.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-              <Button size="default" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold rounded-lg shadow-sm">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-3">
+              <Button 
+                size="default" 
+                className="bg-[#FFB703] text-[#1a0b2e] hover:bg-[#FFA500] font-semibold px-6 h-11 rounded-lg shadow-sm hover:shadow-md transition-all"
+              >
                 Sign up for free
               </Button>
-              <Button size="default" variant="outline" className="bg-white border-2 border-foreground/20 hover:bg-gray-50 font-semibold rounded-lg">
+              <Button 
+                size="default" 
+                variant="ghost" 
+                className="bg-transparent border-2 border-[#1a0b2e] text-[#1a0b2e] hover:bg-[#1a0b2e]/5 font-semibold px-6 h-11 rounded-lg"
+              >
                 Is Appetyte for you?
               </Button>
             </div>
 
             {/* Integration Text */}
             <div className="pt-6">
-              <div className="flex items-center justify-center gap-2 text-foreground/60 mb-4">
-                <span className="text-sm">Integrate with nearly any tool or framework under the sun</span>
-                <a href="#features" className="text-sm font-semibold text-foreground hover:text-primary transition-colors inline-flex items-center gap-1">
+              <div className="flex items-center justify-center gap-2 text-foreground/60 mb-5 text-sm">
+                <span>Integrate with nearly any tool or framework under the sun</span>
+                <a href="#features" className="font-semibold text-foreground hover:text-primary transition-colors inline-flex items-center gap-1">
                   View all
                   <ArrowRight className="h-3 w-3" />
                 </a>
               </div>
 
               {/* Integration Icons */}
-              <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap opacity-50">
-                <Calendar className="h-10 w-10 md:h-12 md:w-12" />
-                <Users className="h-10 w-10 md:h-12 md:w-12" />
-                <DollarSign className="h-10 w-10 md:h-12 md:w-12" />
-                <FileText className="h-10 w-10 md:h-12 md:w-12" />
-                <CheckCircle2 className="h-10 w-10 md:h-12 md:w-12" />
+              <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap opacity-40">
+                <Calendar className="h-10 w-10 md:h-11 md:w-11" />
+                <Users className="h-10 w-10 md:h-11 md:w-11" />
+                <DollarSign className="h-10 w-10 md:h-11 md:w-11" />
+                <FileText className="h-10 w-10 md:h-11 md:w-11" />
+                <CheckCircle2 className="h-10 w-10 md:h-11 md:w-11" />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Video Section */}
+      <section className="bg-white py-12 md:py-16">
+        <div className="container mx-auto px-6 md:px-12 lg:px-24">
+          <div className="max-w-4xl mx-auto text-center">
+            <button className="group inline-flex items-center gap-4 bg-[#1a0b2e] text-white px-7 py-3.5 rounded-full hover:bg-[#2a1b3e] transition-all duration-300 shadow-md hover:shadow-lg">
+              <div className="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <div className="w-0 h-0 border-l-[11px] border-l-white border-t-[7px] border-t-transparent border-b-[7px] border-b-transparent ml-1"></div>
+              </div>
+              <div className="text-left">
+                <div className="font-semibold text-base">Watch product demo</div>
+                <div className="text-xs text-white/80">See how Appetyte simplifies your workflow</div>
+              </div>
+            </button>
           </div>
         </div>
       </section>
