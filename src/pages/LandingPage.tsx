@@ -39,7 +39,7 @@ export default function LandingPage() {
       <section className="relative overflow-hidden" style={{
         background: 'radial-gradient(ellipse at top center, #FFD88D 0%, #FFEAC4 30%, #FFF5E1 60%, #FFFBF5 100%)'
       }}>
-        <div className="mx-auto px-2 py-12 md:py-20 lg:py-24">
+        <div className="py-12 md:py-20 lg:py-24">
           <div className="max-w-4xl mx-auto text-center space-y-5 animate-fade-in">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
