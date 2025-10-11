@@ -9,7 +9,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 pt-4 px-4">
+      <nav className="absolute top-0 left-0 right-0 z-50 pt-2 px-4">
         <div className="container mx-auto max-w-7xl">
           <div className="bg-background/60 backdrop-blur-md rounded-full border border-border/40 shadow-sm px-6 md:px-8">
             <div className="flex items-center justify-between h-16">
@@ -38,7 +38,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden" style={{
+      <section className="relative overflow-hidden pt-20" style={{
         background: 'radial-gradient(ellipse at top center, #FFD88D 0%, #FFEAC4 30%, #FFF5E1 60%, #FFFBF5 100%)'
       }}>
         <div className="py-12 md:py-20 lg:py-24">
