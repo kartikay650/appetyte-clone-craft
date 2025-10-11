@@ -9,9 +9,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
-        <div className="container mx-auto px-6 md:px-12 lg:px-24">
-          <div className="flex items-center justify-between h-16">
+      <nav className="sticky top-0 z-50 pt-4 px-4">
+        <div className="container mx-auto max-w-7xl">
+          <div className="bg-background/60 backdrop-blur-md rounded-full border border-border/40 shadow-sm px-6 md:px-8">
+            <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
                 Appetyte
@@ -30,6 +31,7 @@ export default function LandingPage() {
               <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold rounded-lg shadow-sm">
                 Sign up
               </Button>
+            </div>
             </div>
           </div>
         </div>
