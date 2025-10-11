@@ -24,11 +24,11 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" onClick={() => navigate("/")}>
-                Login
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-medium">
+                Log in
               </Button>
-              <Button variant="default" size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
-                Sign Up
+              <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold rounded-lg shadow-sm">
+                Sign up
               </Button>
             </div>
           </div>
@@ -36,40 +36,40 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-orange-100 via-yellow-50 to-amber-100">
-        <div className="container mx-auto px-6 md:px-12 lg:px-24 py-20 md:py-32">
-          <div className="max-w-5xl mx-auto text-center space-y-8 animate-fade-in">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#fef3e2] via-[#fef7e8] to-[#fffbf0]">
+        <div className="mx-auto px-6 md:px-12 lg:px-24 py-16 md:py-24">
+          <div className="max-w-5xl mx-auto text-center space-y-6 animate-fade-in">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-foreground text-background px-4 py-1.5 rounded-full text-sm font-medium">
-              <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-bold">NEW</span>
+            <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 rounded-full text-xs font-semibold">
+              <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-[10px] font-bold">NEW</span>
               <span>Weekly meal plans + auto-reminders</span>
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight" style={{ color: '#1a0b2e' }}>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight" style={{ color: '#1a0b2e' }}>
               The Tiffin Management System
             </h1>
 
             {/* Subtext */}
-            <p className="text-xl md:text-2xl text-foreground/80 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-foreground/70 max-w-3xl mx-auto leading-relaxed">
               Orders, payments, reminders, customer tracking—it's all here. Ditch the spreadsheets and WhatsApp chaos and manage your{" "}
               <span className="font-semibold">tiffin service</span>, <span className="font-semibold">meal delivery</span>, <span className="font-semibold">home kitchen</span>, or <span className="font-semibold">catering business</span> using one simple platform.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 text-base font-semibold px-8 py-6 h-auto rounded-lg shadow-lg">
-                Get Started Free
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+              <Button size="default" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold rounded-lg shadow-sm">
+                Sign up for free
               </Button>
-              <Button size="lg" variant="outline" className="bg-white border-2 border-foreground/20 hover:bg-white/80 text-base font-semibold px-8 py-6 h-auto rounded-lg">
-                See How It Works
+              <Button size="default" variant="outline" className="bg-white border-2 border-foreground/20 hover:bg-gray-50 font-semibold rounded-lg">
+                Is Appetyte for you?
               </Button>
             </div>
 
             {/* Integration Text */}
-            <div className="pt-8">
-              <div className="flex items-center justify-center gap-2 text-foreground/70 mb-6">
-                <span className="text-sm font-medium">Perfect for home chefs, tiffin services, and meal prep businesses</span>
+            <div className="pt-6">
+              <div className="flex items-center justify-center gap-2 text-foreground/60 mb-4">
+                <span className="text-sm">Integrate with nearly any tool or framework under the sun</span>
                 <a href="#features" className="text-sm font-semibold text-foreground hover:text-primary transition-colors inline-flex items-center gap-1">
                   View all
                   <ArrowRight className="h-3 w-3" />
@@ -77,14 +77,31 @@ export default function LandingPage() {
               </div>
 
               {/* Integration Icons */}
-              <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap opacity-60">
-                <Calendar className="h-8 w-8 md:h-10 md:w-10" />
-                <Users className="h-8 w-8 md:h-10 md:w-10" />
-                <DollarSign className="h-8 w-8 md:h-10 md:w-10" />
-                <FileText className="h-8 w-8 md:h-10 md:w-10" />
-                <CheckCircle2 className="h-8 w-8 md:h-10 md:w-10" />
+              <div className="flex items-center justify-center gap-6 md:gap-8 flex-wrap opacity-50">
+                <Calendar className="h-10 w-10 md:h-12 md:w-12" />
+                <Users className="h-10 w-10 md:h-12 md:w-12" />
+                <DollarSign className="h-10 w-10 md:h-12 md:w-12" />
+                <FileText className="h-10 w-10 md:h-12 md:w-12" />
+                <CheckCircle2 className="h-10 w-10 md:h-12 md:w-12" />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Video Section */}
+      <section className="bg-white py-16">
+        <div className="container mx-auto px-6 md:px-12 lg:px-24">
+          <div className="max-w-4xl mx-auto text-center">
+            <button className="group inline-flex items-center gap-4 bg-[#1a0b2e] text-white px-8 py-4 rounded-full hover:bg-[#2a1b3e] transition-all duration-300 shadow-lg hover:shadow-xl">
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <div className="w-0 h-0 border-l-[12px] border-l-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
+              </div>
+              <div className="text-left">
+                <div className="font-bold text-lg">Watch product demo</div>
+                <div className="text-sm text-white/80">See how Appetyte simplifies your workflow</div>
+              </div>
+            </button>
           </div>
         </div>
       </section>
