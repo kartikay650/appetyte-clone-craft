@@ -26,20 +26,24 @@ export default function ProviderLogin() {
 
       if (authError) throw authError
 
-      const { data: provider, error: providerError } = await supabase
+      const { data: provider, error: providerError } = await (supabase as any)
         .from('providers')
         .select('sub_url')
         .eq('id', authData.user.id)
-        .single()
+        .maybeSingle()
 
       if (providerError) throw providerError
+      
+      if (!provider) {
+        throw new Error('Provider account not found')
+      }
 
       toast({
         title: "Login Successful",
         description: "Welcome back to Appetyte!",
       })
 
-      navigate(`/${provider.sub_url}/admin`)
+      navigate(`/${(provider as any).sub_url}/admin`)
     } catch (error: any) {
       toast({
         title: "Login Failed",

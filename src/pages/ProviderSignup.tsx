@@ -38,7 +38,7 @@ export default function ProviderSignup() {
   const checkSubUrlAvailability = async (businessName: string): Promise<boolean> => {
     const subUrl = businessName.toLowerCase().replace(/[^a-z0-9]/g, '')
     
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('providers')
       .select('sub_url')
       .eq('sub_url', subUrl)
@@ -94,7 +94,7 @@ export default function ProviderSignup() {
 
       const subUrl = formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '')
 
-      const { error: insertError } = await supabase
+      const { error: insertError } = await (supabase as any)
         .from('providers')
         .insert({
           id: authData.user!.id,
