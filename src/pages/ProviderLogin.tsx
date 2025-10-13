@@ -27,25 +27,15 @@ export default function ProviderLogin() {
       if (authError) throw authError
       if (!authData?.user?.id) throw new Error('Login failed')
 
-      // Wait for session to be fully established
-      await new Promise(resolve => setTimeout(resolve, 100))
-
       const { data: provider, error: providerError } = await supabase
         .from('providers')
         .select('sub_url')
         .eq('id', authData.user.id)
         .maybeSingle()
 
-      if (providerError) {
-        console.error('Provider error:', providerError)
-        throw new Error('Failed to load provider data')
-      }
-      
-      if (!provider?.sub_url) {
-        throw new Error('Provider account not found')
-      }
+      if (providerError) throw providerError
+      if (!provider?.sub_url) throw new Error('Provider account not found')
 
-      // Redirect to provider-specific admin page
       window.location.href = `/${provider.sub_url}/admin`
     } catch (error: any) {
       setIsLoading(false)
