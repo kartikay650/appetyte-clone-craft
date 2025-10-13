@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Clock, IndianRupee, AlertTriangle } from "lucide-react"
+import { Clock, IndianRupee, AlertTriangle, MapPin, CheckCircle } from "lucide-react"
 import { useOrderingStatus } from "@/hooks/use-time-updates"
 import { formatTime } from "@/lib/utils/time"
 import { supabase } from "@/integrations/supabase/client"
@@ -21,17 +21,34 @@ interface Meal {
   created_at: string
 }
 
+interface Order {
+  id: string
+  customer_id: string
+  provider_id: string
+  meal_id: string
+  selected_option: string
+  delivery_address: string
+  status: string
+  amount: number
+  timestamp: string
+}
+
 interface MealCardProps {
   meal: Meal
   customerId: string
   providerId: string
+  existingOrder?: Order
+  deliveryAddress: string
 }
 
-export function MealCard({ meal, customerId, providerId }: MealCardProps) {
+export function MealCard({ meal, customerId, providerId, existingOrder, deliveryAddress }: MealCardProps) {
   const [selectedOption, setSelectedOption] = useState(meal.option_1)
   const [isOrdering, setIsOrdering] = useState(false)
 
   const { isOrderingAllowed, timeUntilCutoff } = useOrderingStatus(meal.cut_off_time, meal.date)
+  
+  // Check if customer has already ordered this meal
+  const hasOrdered = !!existingOrder
 
   const getMealTypeColor = (mealType: string) => {
     switch (mealType) {
@@ -58,6 +75,23 @@ export function MealCard({ meal, customerId, providerId }: MealCardProps) {
 
   const urgencyLevel = getUrgencyLevel()
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+      case "confirmed":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+      case "out_for_delivery":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+      case "delivered":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+      case "cancelled":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+      default:
+        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+    }
+  }
+
   const handlePlaceOrder = async () => {
     if (!isOrderingAllowed) {
       toast({
@@ -68,18 +102,18 @@ export function MealCard({ meal, customerId, providerId }: MealCardProps) {
       return
     }
 
+    if (!deliveryAddress) {
+      toast({
+        title: "No delivery address",
+        description: "Please update your profile with a delivery address.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsOrdering(true)
 
     try {
-      // Fetch customer details for delivery address
-      const { data: customer, error: customerError } = await supabase
-        .from("customers")
-        .select("address")
-        .eq("id", customerId)
-        .single()
-
-      if (customerError) throw customerError
-
       // Create order
       const { error: orderError } = await supabase
         .from("orders")
@@ -89,7 +123,7 @@ export function MealCard({ meal, customerId, providerId }: MealCardProps) {
           meal_id: meal.id,
           selected_option: selectedOption,
           amount: meal.price,
-          delivery_address: customer.address,
+          delivery_address: deliveryAddress,
           status: "pending",
         })
 
@@ -97,7 +131,7 @@ export function MealCard({ meal, customerId, providerId }: MealCardProps) {
 
       toast({
         title: "Order placed successfully!",
-        description: `Your order for ${meal.meal_type} (${selectedOption}) has been placed.`,
+        description: `Your order for ${selectedOption} has been placed.`,
       })
     } catch (error: any) {
       toast({
@@ -110,6 +144,52 @@ export function MealCard({ meal, customerId, providerId }: MealCardProps) {
     }
   }
 
+  // STATE 1: Already Ordered - Show order details
+  if (hasOrdered) {
+    return (
+      <Card className="bg-muted/30">
+        <CardHeader className="pb-3 sm:pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex-1">
+              <CardTitle className="capitalize flex items-center gap-2 text-base sm:text-lg">
+                {meal.meal_type}
+                <Badge className={`${getMealTypeColor(meal.meal_type)} text-xs`}>{meal.meal_type}</Badge>
+              </CardTitle>
+              <CardDescription className="flex items-center gap-1 mt-2 text-xs sm:text-sm">
+                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                Order placed
+              </CardDescription>
+            </div>
+            <Badge className={`${getStatusColor(existingOrder.status)} text-xs`}>
+              {existingOrder.status.replace("_", " ")}
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <CardContent className="space-y-3">
+          <div className="bg-background rounded-lg p-3 space-y-2">
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">You ordered: {existingOrder.selected_option}</p>
+                <p className="text-xs text-muted-foreground mt-1">Amount: ₹{existingOrder.amount}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">Delivery to:</p>
+                <p className="text-sm">{existingOrder.delivery_address}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // STATE 2: Available for Order - Show meal options and order button
   return (
     <Card
       className={`${!isOrderingAllowed ? "opacity-60" : ""} ${urgencyLevel === "urgent" ? "border-red-500 shadow-red-100 dark:shadow-red-900/20" : urgencyLevel === "warning" ? "border-yellow-500" : ""}`}
@@ -178,12 +258,30 @@ export function MealCard({ meal, customerId, providerId }: MealCardProps) {
           </RadioGroup>
         </div>
 
+        {deliveryAddress && (
+          <div className="bg-muted rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs text-muted-foreground">Delivery to:</p>
+                <p className="text-sm">{deliveryAddress}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <Button
           className="w-full"
-          disabled={!isOrderingAllowed || isOrdering}
+          disabled={!isOrderingAllowed || isOrdering || !deliveryAddress}
           onClick={handlePlaceOrder}
         >
-          {isOrdering ? "Placing order..." : isOrderingAllowed ? "Place Order" : "Ordering Closed"}
+          {isOrdering 
+            ? "Placing order..." 
+            : !deliveryAddress 
+            ? "No delivery address set" 
+            : isOrderingAllowed 
+            ? "Place Order" 
+            : "Ordering Closed"}
         </Button>
       </CardContent>
     </Card>
