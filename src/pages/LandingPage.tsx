@@ -2,12 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Calendar, DollarSign, Users, FileText, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
 export default function LandingPage() {
   const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
         {/* FIX: Reduced padding for a wider content area */}
@@ -18,28 +15,16 @@ export default function LandingPage() {
                 Appetyte
               </h1>
               <div className="hidden md:flex space-x-6">
-                <a
-                  href="#features"
-                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-                >
+                <a href="#features" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
                   Features
                 </a>
-                <a
-                  href="#how-it-works"
-                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-                >
+                <a href="#how-it-works" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
                   How It Works
                 </a>
-                <a
-                  href="#testimonials"
-                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-                >
+                <a href="#testimonials" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
                   Pricing
                 </a>
-                <a
-                  href="#footer"
-                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-                >
+                <a href="#footer" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
                   Contact
                 </a>
               </div>
@@ -48,10 +33,7 @@ export default function LandingPage() {
               <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-medium">
                 Log in
               </Button>
-              <Button
-                size="sm"
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold rounded-lg shadow-sm"
-              >
+              <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold rounded-lg shadow-sm">
                 Sign up
               </Button>
             </div>
@@ -60,12 +42,9 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section (The Yellow Box) */}
-      <section
-        className="relative overflow-hidden"
-        style={{
-          background: "radial-gradient(ellipse at top center, #FFD88D 0%, #FFEAC4 30%, #FFF5E1 60%, #FFFBF5 100%)",
-        }}
-      >
+      <section className="relative overflow-hidden" style={{
+      background: "radial-gradient(ellipse at top center, #FFD88D 0%, #FFEAC4 30%, #FFF5E1 60%, #FFFBF5 100%)"
+    }}>
         {/* FIX: Reduced vertical padding and increased max-width for content to feel wider */}
         <div className="py-10 md:py-16 lg:py-20">
           <div className="max-w-6xl mx-auto text-center space-y-5 animate-fade-in px-4">
@@ -76,12 +55,9 @@ export default function LandingPage() {
             </div>
 
             {/* Main Headline */}
-            <h1
-              className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight"
-              style={{
-                color: "#1a0b2e",
-              }}
-            >
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight" style={{
+            color: "#1a0b2e"
+          }}>
               The Tiffin Management System
             </h1>
 
@@ -95,29 +71,17 @@ export default function LandingPage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-3">
-              <Button
-                size="default"
-                className="bg-[#FFB703] text-[#1a0b2e] hover:bg-[#FFA500] font-semibold px-6 h-11 rounded-lg shadow-sm hover:shadow-md transition-all"
-              >
+              <Button size="default" className="bg-[#FFB703] text-[#1a0b2e] hover:bg-[#FFA500] font-semibold px-6 h-11 rounded-lg shadow-sm hover:shadow-md transition-all">
                 Sign up for free
               </Button>
-              <Button
-                size="default"
-                variant="ghost"
-                className="bg-transparent border-2 border-[#1a0b2e] text-[#1a0b2e] hover:bg-[#1a0b2e]/5 font-semibold px-6 h-11 rounded-lg"
-              >
-                Is Appetyte for you?
-              </Button>
+              
             </div>
 
             {/* Integration Text */}
             <div className="pt-6">
               <div className="flex items-center justify-center gap-2 text-foreground/60 mb-5 text-sm">
                 <span>Integrate with nearly any tool or framework under the sun</span>
-                <a
-                  href="#features"
-                  className="font-semibold text-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
-                >
+                <a href="#features" className="font-semibold text-foreground hover:text-primary transition-colors inline-flex items-center gap-1">
                   View all
                   <ArrowRight className="h-3 w-3" />
                 </a>
@@ -153,35 +117,25 @@ export default function LandingPage() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            {
-              icon: Calendar,
-              title: "Order Management",
-              description: "Take and track daily orders seamlessly with an intuitive dashboard.",
-            },
-            {
-              icon: DollarSign,
-              title: "Payment Reminders",
-              description: "Automate weekly payment updates for customers to ensure timely payments.",
-            },
-            {
-              icon: Users,
-              title: "Customer Accounts",
-              description: "Maintain balance and order history transparently for each customer.",
-            },
-            {
-              icon: FileText,
-              title: "Summary Reports",
-              description: "Get organized summaries to prepare food efficiently and plan ahead.",
-            },
-          ].map((feature, index) => (
-            <Card
-              key={index}
-              className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in"
-              style={{
-                animationDelay: `${index * 100}ms`,
-              }}
-            >
+          {[{
+          icon: Calendar,
+          title: "Order Management",
+          description: "Take and track daily orders seamlessly with an intuitive dashboard."
+        }, {
+          icon: DollarSign,
+          title: "Payment Reminders",
+          description: "Automate weekly payment updates for customers to ensure timely payments."
+        }, {
+          icon: Users,
+          title: "Customer Accounts",
+          description: "Maintain balance and order history transparently for each customer."
+        }, {
+          icon: FileText,
+          title: "Summary Reports",
+          description: "Get organized summaries to prepare food efficiently and plan ahead."
+        }].map((feature, index) => <Card key={index} className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in" style={{
+          animationDelay: `${index * 100}ms`
+        }}>
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                   <feature.icon className="h-6 w-6 text-primary" />
@@ -191,8 +145,7 @@ export default function LandingPage() {
               <CardContent>
                 <CardDescription className="text-base">{feature.description}</CardDescription>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </section>
 
@@ -205,30 +158,21 @@ export default function LandingPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {[
-            {
-              step: "01",
-              title: "Create your account",
-              description: "Sign up in seconds and set up your tiffin service profile.",
-            },
-            {
-              step: "02",
-              title: "Add your customers",
-              description: "Import your customer list and start taking orders right away.",
-            },
-            {
-              step: "03",
-              title: "Automate & grow",
-              description: "Get payment reminders and summaries automatically delivered.",
-            },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="relative animate-fade-in"
-              style={{
-                animationDelay: `${index * 150}ms`,
-              }}
-            >
+          {[{
+          step: "01",
+          title: "Create your account",
+          description: "Sign up in seconds and set up your tiffin service profile."
+        }, {
+          step: "02",
+          title: "Add your customers",
+          description: "Import your customer list and start taking orders right away."
+        }, {
+          step: "03",
+          title: "Automate & grow",
+          description: "Get payment reminders and summaries automatically delivered."
+        }].map((item, index) => <div key={index} className="relative animate-fade-in" style={{
+          animationDelay: `${index * 150}ms`
+        }}>
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white text-2xl font-bold flex items-center justify-center mx-auto shadow-lg">
                   {item.step}
@@ -236,11 +180,8 @@ export default function LandingPage() {
                 <h3 className="text-xl font-semibold">{item.title}</h3>
                 <p className="text-muted-foreground">{item.description}</p>
               </div>
-              {index < 2 && (
-                <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/50 to-transparent"></div>
-              )}
-            </div>
-          ))}
+              {index < 2 && <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/50 to-transparent"></div>}
+            </div>)}
         </div>
       </section>
 
@@ -252,30 +193,21 @@ export default function LandingPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {[
-            {
-              name: "Priya Sharma",
-              role: "Home Chef, Mumbai",
-              text: "Appetyte made managing 50+ daily orders easy and error-free! I can focus on cooking instead of spreadsheets.",
-            },
-            {
-              name: "Rajesh Kumar",
-              role: "Tiffin Service Owner",
-              text: "The payment reminders are a game-changer. No more awkward calls to customers about pending payments.",
-            },
-            {
-              name: "Anita Desai",
-              role: "Customer",
-              text: "As a customer, I love being able to track my orders and balance. Everything is so transparent and easy!",
-            },
-          ].map((testimonial, index) => (
-            <Card
-              key={index}
-              className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in"
-              style={{
-                animationDelay: `${index * 100}ms`,
-              }}
-            >
+          {[{
+          name: "Priya Sharma",
+          role: "Home Chef, Mumbai",
+          text: "Appetyte made managing 50+ daily orders easy and error-free! I can focus on cooking instead of spreadsheets."
+        }, {
+          name: "Rajesh Kumar",
+          role: "Tiffin Service Owner",
+          text: "The payment reminders are a game-changer. No more awkward calls to customers about pending payments."
+        }, {
+          name: "Anita Desai",
+          role: "Customer",
+          text: "As a customer, I love being able to track my orders and balance. Everything is so transparent and easy!"
+        }].map((testimonial, index) => <Card key={index} className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in" style={{
+          animationDelay: `${index * 100}ms`
+        }}>
               <CardHeader>
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-semibold">
@@ -290,8 +222,7 @@ export default function LandingPage() {
               <CardContent>
                 <p className="text-muted-foreground italic">"{testimonial.text}"</p>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </section>
 
@@ -305,11 +236,7 @@ export default function LandingPage() {
               Join hundreds of tiffin providers who trust Appetyte to manage their daily operations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                size="lg"
-                variant="secondary"
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
-              >
+              <Button size="lg" variant="secondary" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -397,6 +324,5 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 }
