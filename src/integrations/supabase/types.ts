@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      providers: {
+        Row: {
+          account_status: string
+          business_name: string
+          contact_number: string
+          created_at: string
+          email_id: string
+          id: string
+          owner_name: string
+          password_hash: string
+          service_area: string
+          sub_url: string
+        }
+        Insert: {
+          account_status?: string
+          business_name: string
+          contact_number: string
+          created_at?: string
+          email_id: string
+          id?: string
+          owner_name: string
+          password_hash: string
+          service_area: string
+          sub_url: string
+        }
+        Update: {
+          account_status?: string
+          business_name?: string
+          contact_number?: string
+          created_at?: string
+          email_id?: string
+          id?: string
+          owner_name?: string
+          password_hash?: string
+          service_area?: string
+          sub_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
