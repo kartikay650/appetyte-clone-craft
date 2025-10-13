@@ -43,7 +43,7 @@ export default function ProviderLogin() {
         description: "Welcome back to Appetyte!",
       })
 
-      navigate(`/${(provider as any).sub_url}/admin`)
+      navigate(`/${provider.sub_url}/admin`)
     } catch (error: any) {
       toast({
         title: "Login Failed",
