@@ -19,12 +19,14 @@ export default function ProviderLogin() {
     setIsLoading(true)
 
     try {
+      console.log('Starting login...')
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (authError) throw authError
+      console.log('Auth successful, user ID:', authData.user.id)
 
       const { data: provider, error: providerError } = await (supabase as any)
         .from('providers')
@@ -32,25 +34,32 @@ export default function ProviderLogin() {
         .eq('id', authData.user.id)
         .maybeSingle()
 
+      console.log('Provider data:', provider, 'Error:', providerError)
+
       if (providerError) throw providerError
       
       if (!provider) {
         throw new Error('Provider account not found')
       }
 
+      console.log('Navigating to:', `/${provider.sub_url}/admin`)
+
       toast({
         title: "Login Successful",
         description: "Welcome back to Appetyte!",
       })
 
-      navigate(`/${provider.sub_url}/admin`)
+      // Use setTimeout to ensure navigation happens after state updates
+      setTimeout(() => {
+        navigate(`/${provider.sub_url}/admin`, { replace: true })
+      }, 100)
     } catch (error: any) {
+      console.error('Login error:', error)
       toast({
         title: "Login Failed",
         description: error.message || "Invalid credentials",
         variant: "destructive",
       })
-    } finally {
       setIsLoading(false)
     }
   }
