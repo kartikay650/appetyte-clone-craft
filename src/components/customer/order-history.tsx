@@ -1,19 +1,26 @@
-import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { IndianRupee, Clock, X } from "lucide-react"
-import { dataStore } from "@/lib/data-store"
+import { IndianRupee, Clock } from "lucide-react"
 import { formatDate } from "@/lib/utils/time"
-import type { Order } from "@/lib/types"
+
+interface Order {
+  id: string
+  customer_id: string
+  meal_id: string
+  selected_option: string
+  delivery_address: string
+  status: string
+  amount: number
+  timestamp: string
+}
 
 interface OrderHistoryProps {
   orders: Order[]
   onOrderUpdate?: () => void
 }
 
-export function OrderHistory({ orders, onOrderUpdate }: OrderHistoryProps) {
-  const getStatusColor = (status: Order["status"]) => {
+export function OrderHistory({ orders }: OrderHistoryProps) {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
@@ -28,18 +35,6 @@ export function OrderHistory({ orders, onOrderUpdate }: OrderHistoryProps) {
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
     }
-  }
-
-  const handleCancelOrder = (orderId: string) => {
-    const order = orders.find((o) => o.id === orderId)
-    if (order && order.status === "pending") {
-      dataStore.cancelOrder(orderId)
-      onOrderUpdate?.()
-    }
-  }
-
-  const canCancelOrder = (order: Order) => {
-    return order.status === "pending"
   }
 
   const sortedOrders = [...orders].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -65,14 +60,13 @@ export function OrderHistory({ orders, onOrderUpdate }: OrderHistoryProps) {
       </div>
 
       {sortedOrders.map((order) => {
-        const meal = dataStore.getMeals().find((m) => m.id === order.meal_id)
         return (
           <Card key={order.id}>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <CardTitle className="text-sm sm:text-base capitalize truncate">
-                    {meal?.meal_type || "Unknown Meal"}
+                    Order
                   </CardTitle>
                   <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1">
                     <span className="flex items-center gap-1 text-xs">
@@ -87,16 +81,6 @@ export function OrderHistory({ orders, onOrderUpdate }: OrderHistoryProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className={`${getStatusColor(order.status)} text-xs`}>{order.status.replace("_", " ")}</Badge>
-                  {canCancelOrder(order) && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleCancelOrder(order.id)}
-                      className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
                 </div>
               </div>
             </CardHeader>

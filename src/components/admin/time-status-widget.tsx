@@ -1,14 +1,11 @@
-import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Clock, AlertTriangle, CheckCircle } from "lucide-react"
 import { useTimeUpdates } from "@/hooks/use-time-updates"
 import { getNextMealTime, getMealTimeStatus } from "@/lib/utils/time"
-import { dataStore } from "@/lib/data-store"
 
 export function TimeStatusWidget() {
   const currentTime = useTimeUpdates(30000) // Update every 30 seconds
-  const todaysMeals = dataStore.getTodaysMeals()
   const nextMeal = getNextMealTime()
 
   const getMealStatusIcon = (status: string) => {
@@ -42,30 +39,13 @@ export function TimeStatusWidget() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          Meal Ordering Status
+          Current Time
         </CardTitle>
-        <CardDescription>Real-time status of today's meal ordering</CardDescription>
+        <CardDescription>Monitor your meal service status</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {todaysMeals.map((meal) => {
-          const status = getMealTimeStatus(meal.cut_off_time, meal.date)
-          return (
-            <div key={meal.id} className="flex items-center justify-between p-3 border rounded-lg">
-              <div className="flex items-center gap-3">
-                {getMealStatusIcon(status.status)}
-                <div>
-                  <p className="font-medium capitalize">{meal.meal_type}</p>
-                  <p className="text-sm text-muted-foreground">Cutoff: {meal.cut_off_time}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <Badge className={getStatusColor(status.status)}>{status.status.replace("_", " ")}</Badge>
-                <p className="text-xs text-muted-foreground mt-1">{status.timeLeft}</p>
-              </div>
-            </div>
-          )
-        })}
-
+        <div className="text-2xl font-bold">{new Date().toLocaleTimeString()}</div>
+        
         {nextMeal && (
           <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
             <p className="text-sm font-medium text-blue-800 dark:text-blue-200">

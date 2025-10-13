@@ -1,102 +1,82 @@
-import React, { useState, useEffect } from "react"
-import { useAuth } from "@/contexts/auth-context"
-import { dataStore } from "@/lib/data-store"
-import { MealCard } from "./meal-card"
-import { BalanceCard } from "./balance-card"
-import { OrderHistory } from "./order-history"
-import { PaymentHistory } from "./payment-history"
+import { useEffect, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Meal, Order, User, Payment } from "@/lib/types"
+import { MealCard } from "./meal-card"
+import { supabase } from "@/integrations/supabase/client"
 
-export function CustomerDashboard() {
-  const { user } = useAuth()
-  const [todaysMeals, setTodaysMeals] = useState<Meal[]>([])
-  const [userOrders, setUserOrders] = useState<Order[]>([])
-  const [userProfile, setUserProfile] = useState<User | null>(null)
-  const [userPayments, setUserPayments] = useState<Payment[]>([])
+interface Meal {
+  id: string
+  provider_id: string
+  date: string
+  meal_type: string
+  option_1: string
+  option_2?: string
+  price: number
+  cut_off_time: string
+  created_at: string
+}
+
+interface CustomerDashboardProps {
+  providerId: string
+}
+
+export function CustomerDashboard({ providerId }: CustomerDashboardProps) {
+  const [meals, setMeals] = useState<Meal[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (user) {
-      loadUserData()
-    }
-  }, [user])
+    loadMeals()
+  }, [providerId])
 
-  const loadUserData = () => {
-    if (user) {
-      // Load today's meals
-      setTodaysMeals(dataStore.getTodaysMeals())
+  const loadMeals = async () => {
+    setIsLoading(true)
+    const today = new Date().toISOString().split('T')[0]
+    
+    const { data: mealsData } = await (supabase as any)
+      .from('meals')
+      .select('*')
+      .eq('provider_id', providerId)
+      .eq('date', today)
+      .order('meal_type', { ascending: true })
 
-      // Load user orders
-      setUserOrders(dataStore.getOrdersByUserId(user.id))
-
-      // Load user profile
-      setUserProfile(dataStore.getUserById(user.id) || null)
-
-      // Load user payments
-      setUserPayments(dataStore.getPaymentsByUserId(user.id))
-    }
+    setMeals(mealsData || [])
+    setIsLoading(false)
   }
 
-  const handleOrderPlaced = () => {
-    loadUserData()
-  }
-
-  const handleBalanceUpdate = () => {
-    loadUserData()
-  }
-
-  if (!user || !userProfile) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading...</p>
+          <p>Loading meals...</p>
         </div>
       </div>
     )
   }
 
+  const todaysMeals = meals.filter(meal => meal.date === new Date().toISOString().split('T')[0])
+
   return (
-    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
+    <div className="space-y-4 sm:space-y-6">
       <div className="text-center">
-        <h1 className="text-xl sm:text-2xl font-bold text-balance">Welcome back, {user.name}!</h1>
-        <p className="text-sm sm:text-base text-muted-foreground">Order your meals for today</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Welcome to Appetyte</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Order your delicious meals</p>
       </div>
 
       <Tabs defaultValue="order" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 h-10 sm:h-11">
-          <TabsTrigger value="order" className="text-xs sm:text-sm">
-            Order
-          </TabsTrigger>
-          <TabsTrigger value="history" className="text-xs sm:text-sm">
-            History
-          </TabsTrigger>
-          <TabsTrigger value="payments" className="text-xs sm:text-sm">
-            Payments
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1">
+          <TabsTrigger value="order">Today's Menu</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="order" className="space-y-4 mt-4">
-          <div className="grid gap-3 sm:gap-4">
-            {todaysMeals.length > 0 ? (
-              todaysMeals.map((meal) => <MealCard key={meal.id} meal={meal} onOrderPlaced={handleOrderPlaced} />)
-            ) : (
-              <div className="text-center py-8 sm:py-12">
-                <p className="text-muted-foreground">No meals available for today</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="history" className="mt-4">
-          <OrderHistory orders={userOrders} onOrderUpdate={handleOrderPlaced} />
-        </TabsContent>
-
-        <TabsContent value="payments" className="mt-4">
-          <div className="space-y-4">
-            <BalanceCard balance={userProfile.current_balance} onBalanceUpdate={handleBalanceUpdate} />
-            <PaymentHistory payments={userPayments} />
-          </div>
+        <TabsContent value="order" className="space-y-3 sm:space-y-4">
+          {todaysMeals.length === 0 ? (
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-sm sm:text-base text-muted-foreground">No meals available for today</p>
+            </div>
+          ) : (
+            todaysMeals.map((meal) => (
+              <MealCard key={meal.id} meal={meal} onOrderPlaced={loadMeals} />
+            ))
+          )}
         </TabsContent>
       </Tabs>
     </div>
