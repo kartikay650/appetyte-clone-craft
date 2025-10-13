@@ -39,7 +39,7 @@ export default function ProviderLogin() {
         .from('providers')
         .select('sub_url')
         .eq('id', authData.user.id)
-        .maybeSingle()
+        .single()
 
       console.log('Provider result:', { provider, providerError })
 
