@@ -1,13 +1,12 @@
 import { useParams, Navigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
-import { ProtectedRoute } from "@/components/auth/protected-route"
-import AdminPage from "./AdminPage"
+import { Header } from "@/components/layout/header"
+import { AdminDashboard } from "@/components/admin/admin-dashboard"
 
 export default function ProviderAdminPage() {
   const { subUrl } = useParams<{ subUrl: string }>()
   const [isValidProvider, setIsValidProvider] = useState<boolean | null>(null)
-  const [currentUser, setCurrentUser] = useState<any>(null)
 
   useEffect(() => {
     const checkProvider = async () => {
@@ -17,8 +16,6 @@ export default function ProviderAdminPage() {
         setIsValidProvider(false)
         return
       }
-
-      setCurrentUser(user)
 
       const { data: provider, error } = await (supabase as any)
         .from('providers')
@@ -54,8 +51,11 @@ export default function ProviderAdminPage() {
   }
 
   return (
-    <ProtectedRoute requiredRole="admin">
-      <AdminPage />
-    </ProtectedRoute>
+    <>
+      <Header />
+      <main className="container mx-auto px-4 py-4 sm:py-6 max-w-7xl">
+        <AdminDashboard />
+      </main>
+    </>
   )
 }

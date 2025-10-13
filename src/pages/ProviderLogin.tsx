@@ -25,33 +25,35 @@ export default function ProviderLogin() {
       })
 
       if (authError) throw authError
+      if (!authData?.user?.id) throw new Error('Login failed')
 
-      const { data: provider, error: providerError } = await (supabase as any)
+      // Wait for session to be fully established
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      const { data: provider, error: providerError } = await supabase
         .from('providers')
         .select('sub_url')
         .eq('id', authData.user.id)
         .maybeSingle()
 
-      if (providerError) throw providerError
+      if (providerError) {
+        console.error('Provider error:', providerError)
+        throw new Error('Failed to load provider data')
+      }
       
-      if (!provider) {
+      if (!provider?.sub_url) {
         throw new Error('Provider account not found')
       }
 
-      toast({
-        title: "Login Successful",
-        description: "Welcome back to Appetyte!",
-      })
-
-      navigate(`/${(provider as any).sub_url}/admin`)
+      // Redirect to provider-specific admin page
+      window.location.href = `/${provider.sub_url}/admin`
     } catch (error: any) {
+      setIsLoading(false)
       toast({
         title: "Login Failed",
         description: error.message || "Invalid credentials",
         variant: "destructive",
       })
-    } finally {
-      setIsLoading(false)
     }
   }
 
