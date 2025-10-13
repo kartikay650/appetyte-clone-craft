@@ -11,6 +11,8 @@ import CustomerPage from "./pages/CustomerPage"
 import NotFound from "./pages/NotFound"
 import ProviderSignup from "./pages/ProviderSignup"
 import ProviderLogin from "./pages/ProviderLogin"
+import ProviderAdminPage from "./pages/ProviderAdminPage"
+import ProviderCustomerPage from "./pages/ProviderCustomerPage"
 import "./App.css"
 
 const queryClient = new QueryClient()
@@ -29,6 +31,8 @@ const App = () => (
             <Route path="/dashboard" element={<Index />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/customer" element={<CustomerPage />} />
+            <Route path="/:subUrl/admin" element={<ProviderAdminPage />} />
+            <Route path="/:subUrl/customer" element={<ProviderCustomerPage />} />
             <Route path="/404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
