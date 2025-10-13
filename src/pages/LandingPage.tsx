@@ -10,7 +10,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-background">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
-        {/* MODIFIED: Reduced padding for a wider content area */}
+        {/* FIX: Reduced padding for a wider content area */}
         <div className="container mx-auto px-4 md:px-8 lg:px-12">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
@@ -59,15 +59,16 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section (Yellow Box) - No changes to padding inside this section were needed, as it is max-width limited correctly. */}
+      {/* Hero Section (The Yellow Box) */}
       <section
         className="relative overflow-hidden"
         style={{
           background: "radial-gradient(ellipse at top center, #FFD88D 0%, #FFEAC4 30%, #FFF5E1 60%, #FFFBF5 100%)",
         }}
       >
-        <div className="py-12 md:py-20 lg:py-24">
-          <div className="max-w-4xl mx-auto text-center space-y-5 animate-fade-in">
+        {/* FIX: Reduced vertical padding and increased max-width for content to feel wider */}
+        <div className="py-10 md:py-16 lg:py-20">
+          <div className="max-w-6xl mx-auto text-center space-y-5 animate-fade-in px-4">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
               <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-[10px] font-bold">NEW</span>
@@ -76,14 +77,16 @@ export default function LandingPage() {
 
             {/* Main Headline */}
             <h1
-              className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight px-4"
-              style={{ color: "#1a0b2e" }}
+              className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight"
+              style={{
+                color: "#1a0b2e",
+              }}
             >
               The Tiffin Management System
             </h1>
 
             {/* Subtext */}
-            <p className="text-base md:text-lg text-foreground/70 max-w-3xl mx-auto leading-relaxed font-normal px-4">
+            <p className="text-base md:text-lg text-foreground/70 max-w-4xl mx-auto leading-relaxed font-normal">
               Orders, payments, reminders, customer tracking—it's all here. Ditch the spreadsheets and WhatsApp chaos
               and manage your <span className="font-semibold">tiffin service</span>,{" "}
               <span className="font-semibold">meal delivery</span>, <span className="font-semibold">home kitchen</span>,
@@ -135,24 +138,12 @@ export default function LandingPage() {
 
       {/* Demo Video Section */}
       <section className="bg-white py-16">
-        {/* MODIFIED: Reduced padding for a wider content area */}
-        <div className="container mx-auto px-4 md:px-8 lg:px-12">
-          <div className="max-w-4xl mx-auto text-center">
-            <button className="group inline-flex items-center gap-4 bg-[#1a0b2e] text-white px-8 py-4 rounded-full hover:bg-[#2a1b3e] transition-all duration-300 shadow-lg hover:shadow-xl">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                <div className="w-0 h-0 border-l-[12px] border-l-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
-              </div>
-              <div className="text-left">
-                <div className="font-bold text-lg">Watch product demo</div>
-                <div className="text-sm text-white/80">See how Appetyte simplifies your workflow</div>
-              </div>
-            </button>
-          </div>
-        </div>
+        {/* FIX: Reduced padding for a wider content area */}
+        <div className="container mx-auto px-4 md:px-8 lg:px-12"></div>
       </section>
 
       {/* Key Features Section */}
-      {/* MODIFIED: Reduced padding for a wider content area */}
+      {/* FIX: Reduced padding for a wider content area */}
       <section id="features" className="container mx-auto px-4 md:px-8 lg:px-12 py-20 bg-accent/30">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Built for home chefs and tiffin services</h2>
@@ -187,7 +178,9 @@ export default function LandingPage() {
             <Card
               key={index}
               className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
+              style={{
+                animationDelay: `${index * 100}ms`,
+              }}
             >
               <CardHeader>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
@@ -204,7 +197,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      {/* MODIFIED: Reduced padding for a wider content area */}
+      {/* FIX: Reduced padding for a wider content area */}
       <section id="how-it-works" className="container mx-auto px-4 md:px-8 lg:px-12 py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
@@ -229,7 +222,13 @@ export default function LandingPage() {
               description: "Get payment reminders and summaries automatically delivered.",
             },
           ].map((item, index) => (
-            <div key={index} className="relative animate-fade-in" style={{ animationDelay: `${index * 150}ms` }}>
+            <div
+              key={index}
+              className="relative animate-fade-in"
+              style={{
+                animationDelay: `${index * 150}ms`,
+              }}
+            >
               <div className="text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white text-2xl font-bold flex items-center justify-center mx-auto shadow-lg">
                   {item.step}
@@ -246,7 +245,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      {/* MODIFIED: Reduced padding for a wider content area */}
+      {/* FIX: Reduced padding for a wider content area */}
       <section id="testimonials" className="container mx-auto px-4 md:px-8 lg:px-12 py-20 bg-accent/30">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Loved by tiffin providers and customers alike</h2>
@@ -273,7 +272,9 @@ export default function LandingPage() {
             <Card
               key={index}
               className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
+              style={{
+                animationDelay: `${index * 100}ms`,
+              }}
             >
               <CardHeader>
                 <div className="flex items-center space-x-4">
@@ -295,7 +296,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      {/* MODIFIED: Reduced padding for a wider content area */}
+      {/* FIX: Reduced padding for a wider content area */}
       <section className="container mx-auto px-4 md:px-8 lg:px-12 py-20">
         <Card className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0">
           <CardContent className="p-12 text-center">
@@ -322,7 +323,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer id="footer" className="border-t bg-muted/30">
-        {/* MODIFIED: Reduced padding for a wider content area */}
+        {/* FIX: Reduced padding for a wider content area */}
         <div className="container mx-auto px-4 md:px-8 lg:px-12 py-12">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="space-y-4">
