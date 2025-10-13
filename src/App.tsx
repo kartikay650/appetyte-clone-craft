@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { AuthProvider } from "@/contexts/auth-context"
 import LandingPage from "./pages/LandingPage"
-import Index from "./pages/Index"
 import AdminPage from "./pages/AdminPage"
 import CustomerPage from "./pages/CustomerPage"
 import NotFound from "./pages/NotFound"
@@ -28,7 +27,6 @@ const App = () => (
             <Route path="/" element={<LandingPage />} />
             <Route path="/provider-signup" element={<ProviderSignup />} />
             <Route path="/provider-login" element={<ProviderLogin />} />
-            <Route path="/dashboard" element={<Index />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/customer" element={<CustomerPage />} />
             <Route path="/:subUrl/admin" element={<ProviderAdminPage />} />
