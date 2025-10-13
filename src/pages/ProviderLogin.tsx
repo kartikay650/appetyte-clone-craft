@@ -25,42 +25,53 @@ export default function ProviderLogin() {
       })
 
       if (authError) {
+        console.error('Auth error:', authError)
         throw authError
       }
 
-      if (!authData.user) {
-        throw new Error('Login failed')
+      if (!authData?.user?.id) {
+        throw new Error('No user returned from login')
       }
 
-      const { data: provider, error: providerError } = await (supabase as any)
+      console.log('Logged in user ID:', authData.user.id)
+
+      const { data: provider, error: providerError } = await supabase
         .from('providers')
         .select('sub_url')
         .eq('id', authData.user.id)
         .maybeSingle()
 
+      console.log('Provider result:', { provider, providerError })
+
       if (providerError) {
-        throw providerError
+        console.error('Provider error:', providerError)
+        throw new Error(`Database error: ${providerError.message}`)
       }
       
-      if (!provider) {
-        throw new Error('Provider account not found')
+      if (!provider || !provider.sub_url) {
+        throw new Error('No provider account found for this email')
       }
 
+      console.log('Redirecting to:', `/${provider.sub_url}/admin`)
+
       toast({
-        title: "Login Successful",
-        description: "Welcome back!",
+        title: "Success!",
+        description: "Redirecting to your dashboard...",
       })
 
-      // Direct navigation without waiting for AuthContext
-      window.location.href = `/${provider.sub_url}/admin`
+      // Force navigation
+      setTimeout(() => {
+        window.location.href = `/${provider.sub_url}/admin`
+      }, 500)
+
     } catch (error: any) {
-      console.error('Login error:', error)
+      console.error('Full error:', error)
+      setIsLoading(false)
       toast({
         title: "Login Failed",
-        description: error.message || "Invalid credentials",
+        description: error.message || "Something went wrong",
         variant: "destructive",
       })
-      setIsLoading(false)
     }
   }
 
