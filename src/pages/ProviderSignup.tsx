@@ -82,17 +82,17 @@ export default function ProviderSignup() {
     setIsLoading(true)
 
     try {
-      const subUrl = formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '')
-      
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/${subUrl}/admin`,
+          emailRedirectTo: `${window.location.origin}/`,
         }
       })
 
       if (authError) throw authError
+
+      const subUrl = formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '')
 
       const { error: insertError } = await (supabase as any)
         .from('providers')
