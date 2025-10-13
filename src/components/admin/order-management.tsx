@@ -4,10 +4,21 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { IndianRupee, Clock, User, MapPin } from "lucide-react"
-import { dataStore } from "@/lib/data-store"
+import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { formatDate } from "@/lib/utils/time"
-import type { Order } from "@/lib/types"
+
+interface Order {
+  id: string
+  provider_id: string
+  customer_id: string
+  meal_id: string
+  selected_option: string
+  delivery_address: string
+  status: string
+  amount: number
+  timestamp: string
+}
 
 interface OrderManagementProps {
   orders: Order[]
@@ -18,7 +29,7 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
   const { toast } = useToast()
   const [filterStatus, setFilterStatus] = useState<string>("all")
 
-  const getStatusColor = (status: Order["status"]) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
         return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
@@ -33,8 +44,21 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
     }
   }
 
-  const updateOrderStatus = (orderId: string, newStatus: Order["status"]) => {
-    dataStore.updateOrderStatus(orderId, newStatus)
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const { error } = await (supabase as any)
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId)
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive",
+      })
+      return
+    }
+
     toast({
       title: "Order updated",
       description: `Order status changed to ${newStatus.replace("_", " ")}`,
@@ -107,9 +131,6 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
 
       <div className="grid gap-4">
         {sortedOrders.map((order) => {
-          const customer = dataStore.getUserById(order.user_id)
-          const meal = dataStore.getMeals().find((m) => m.id === order.meal_id)
-
           return (
             <Card key={order.id}>
               <CardHeader className="pb-3">
@@ -117,7 +138,7 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
                   <div>
                     <CardTitle className="text-base flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      {customer?.name || "Unknown Customer"}
+                      Order {order.id.slice(0, 8)}
                     </CardTitle>
                     <CardDescription className="flex items-center gap-4 mt-1">
                       <span className="flex items-center gap-1">
@@ -136,7 +157,7 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
               <CardContent className="space-y-3">
                 <div>
                   <p className="text-sm">
-                    <strong>Meal:</strong> {meal?.meal_type} - {order.selected_option}
+                    <strong>Option:</strong> {order.selected_option}
                   </p>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                     <MapPin className="h-3 w-3" />

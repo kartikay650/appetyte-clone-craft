@@ -2,19 +2,27 @@ import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { IndianRupee, Phone, MapPin, AlertCircle } from "lucide-react"
-import { dataStore } from "@/lib/data-store"
 import { useToast } from "@/hooks/use-toast"
-import type { User } from "@/lib/types"
+
+interface Customer {
+  id: string
+  provider_id: string
+  mobile_number: string
+  name: string
+  address: string
+  current_balance: number
+  created_at: string
+}
 
 interface CustomerManagementProps {
-  customers: User[]
+  customers: Customer[]
   onCustomerUpdate: () => void
 }
 
 export function CustomerManagement({ customers, onCustomerUpdate }: CustomerManagementProps) {
   const { toast } = useToast()
 
-  const sendPaymentReminder = (customer: User) => {
+  const sendPaymentReminder = (customer: Customer) => {
     // In a real app, this would send a WhatsApp message or SMS
     toast({
       title: "Payment reminder sent",
@@ -64,9 +72,6 @@ export function CustomerManagement({ customers, onCustomerUpdate }: CustomerMana
 
       <div className="grid gap-4">
         {customers.map((customer) => {
-          const orders = dataStore.getOrdersByUserId(customer.id)
-          const totalOrders = orders.length
-          const totalSpent = orders.reduce((sum, order) => sum + order.amount, 0)
           const hasOutstanding = customer.current_balance < 0
 
           return (
@@ -98,17 +103,6 @@ export function CustomerManagement({ customers, onCustomerUpdate }: CustomerMana
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Total Orders</p>
-                    <p className="font-medium">{totalOrders}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Total Spent</p>
-                    <p className="font-medium">₹{totalSpent}</p>
-                  </div>
-                </div>
-
                 {hasOutstanding && (
                   <div className="flex gap-2">
                     <Button size="sm" variant="outline" onClick={() => sendPaymentReminder(customer)}>

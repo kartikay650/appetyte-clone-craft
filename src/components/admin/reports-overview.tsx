@@ -1,11 +1,44 @@
 import React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { IndianRupee, TrendingUp, Users, ShoppingBag } from "lucide-react"
-import type { Order, User, Meal } from "@/lib/types"
+
+interface Order {
+  id: string
+  provider_id: string
+  customer_id: string
+  meal_id: string
+  selected_option: string
+  delivery_address: string
+  status: string
+  amount: number
+  timestamp: string
+}
+
+interface Customer {
+  id: string
+  provider_id: string
+  mobile_number: string
+  name: string
+  address: string
+  current_balance: number
+  created_at: string
+}
+
+interface Meal {
+  id: string
+  provider_id: string
+  date: string
+  meal_type: string
+  option_1: string
+  option_2?: string | null
+  price: number
+  cut_off_time: string
+  created_at: string
+}
 
 interface ReportsOverviewProps {
   orders: Order[]
-  customers: User[]
+  customers: Customer[]
   meals: Meal[]
 }
 
@@ -47,7 +80,7 @@ export function ReportsOverview({ orders, customers, meals }: ReportsOverviewPro
 
   // Customer analysis
   const activeCustomers = customers.filter((customer) => {
-    return orders.some((order) => order.user_id === customer.id)
+    return orders.some((order) => order.customer_id === customer.id)
   }).length
 
   return (

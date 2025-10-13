@@ -6,10 +6,21 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Plus, IndianRupee, Clock } from "lucide-react"
-import { dataStore } from "@/lib/data-store"
+import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { formatTime, formatDate } from "@/lib/utils/time"
-import type { Meal } from "@/lib/types"
+
+interface Meal {
+  id: string
+  provider_id: string
+  date: string
+  meal_type: string
+  option_1: string
+  option_2?: string | null
+  price: number
+  cut_off_time: string
+  created_at: string
+}
 
 interface MealManagementProps {
   meals: Meal[]
@@ -28,7 +39,7 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
     cut_off_time: "08:30",
   })
 
-  const handleAddMeal = (e: React.FormEvent) => {
+  const handleAddMeal = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!newMeal.option_1 || !newMeal.price) {
@@ -40,14 +51,37 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
       return
     }
 
-    dataStore.addMeal({
-      date: newMeal.date,
-      meal_type: newMeal.meal_type,
-      option_1: newMeal.option_1,
-      option_2: newMeal.option_2 || undefined,
-      price: Number.parseFloat(newMeal.price),
-      cut_off_time: newMeal.cut_off_time,
-    })
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to add meals",
+        variant: "destructive",
+      })
+      return
+    }
+
+    const { error } = await (supabase as any)
+      .from('meals')
+      .insert({
+        provider_id: user.id,
+        date: newMeal.date,
+        meal_type: newMeal.meal_type,
+        option_1: newMeal.option_1,
+        option_2: newMeal.option_2 || null,
+        price: Number.parseFloat(newMeal.price),
+        cut_off_time: newMeal.cut_off_time,
+      })
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add meal",
+        variant: "destructive",
+      })
+      return
+    }
 
     toast({
       title: "Meal added successfully",

@@ -14,7 +14,200 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          address: string
+          created_at: string
+          current_balance: number
+          id: string
+          mobile_number: string
+          name: string
+          provider_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          current_balance?: number
+          id?: string
+          mobile_number: string
+          name: string
+          provider_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          current_balance?: number
+          id?: string
+          mobile_number?: string
+          name?: string
+          provider_id?: string
+        }
+        Relationships: []
+      }
+      meals: {
+        Row: {
+          created_at: string
+          cut_off_time: string
+          date: string
+          id: string
+          meal_type: string
+          option_1: string
+          option_2: string | null
+          price: number
+          provider_id: string
+        }
+        Insert: {
+          created_at?: string
+          cut_off_time: string
+          date: string
+          id?: string
+          meal_type: string
+          option_1: string
+          option_2?: string | null
+          price: number
+          provider_id: string
+        }
+        Update: {
+          created_at?: string
+          cut_off_time?: string
+          date?: string
+          id?: string
+          meal_type?: string
+          option_1?: string
+          option_2?: string | null
+          price?: number
+          provider_id?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          amount: number
+          customer_id: string
+          delivery_address: string
+          id: string
+          meal_id: string
+          provider_id: string
+          selected_option: string
+          status: string
+          timestamp: string
+        }
+        Insert: {
+          amount: number
+          customer_id: string
+          delivery_address: string
+          id?: string
+          meal_id: string
+          provider_id: string
+          selected_option: string
+          status?: string
+          timestamp?: string
+        }
+        Update: {
+          amount?: number
+          customer_id?: string
+          delivery_address?: string
+          id?: string
+          meal_id?: string
+          provider_id?: string
+          selected_option?: string
+          status?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_meal_id_fkey"
+            columns: ["meal_id"]
+            isOneToOne: false
+            referencedRelation: "meals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          customer_id: string
+          id: string
+          provider_id: string
+          razorpay_transaction_id: string | null
+          status: string
+          timestamp: string
+        }
+        Insert: {
+          amount: number
+          customer_id: string
+          id?: string
+          provider_id: string
+          razorpay_transaction_id?: string | null
+          status?: string
+          timestamp?: string
+        }
+        Update: {
+          amount?: number
+          customer_id?: string
+          id?: string
+          provider_id?: string
+          razorpay_transaction_id?: string | null
+          status?: string
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      providers: {
+        Row: {
+          account_status: string
+          business_name: string
+          contact_number: string
+          created_at: string
+          email_id: string
+          id: string
+          owner_name: string
+          password_hash: string
+          service_area: string
+          sub_url: string
+        }
+        Insert: {
+          account_status?: string
+          business_name: string
+          contact_number: string
+          created_at?: string
+          email_id: string
+          id?: string
+          owner_name: string
+          password_hash: string
+          service_area: string
+          sub_url: string
+        }
+        Update: {
+          account_status?: string
+          business_name?: string
+          contact_number?: string
+          created_at?: string
+          email_id?: string
+          id?: string
+          owner_name?: string
+          password_hash?: string
+          service_area?: string
+          sub_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
