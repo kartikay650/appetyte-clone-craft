@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
 import type { AuthUser } from "@/lib/types"
-import { dataStore } from "@/lib/data-store"
+import { supabase } from "@/integrations/supabase/client"
 
 interface AuthContextType {
   user: AuthUser | null
@@ -16,37 +16,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for stored auth on mount
-    const storedUser = localStorage.getItem("appetyte_user")
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser)
-        setUser(parsedUser)
-      } catch (error) {
-        localStorage.removeItem("appetyte_user")
+    // Check Supabase session first
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session?.user) {
+        // Fetch provider data
+        const { data: provider } = await (supabase as any)
+          .from('providers')
+          .select('business_name, sub_url')
+          .eq('id', session.user.id)
+          .maybeSingle()
+
+        if (provider) {
+          setUser({
+            id: session.user.id,
+            mobile_number: '', // Not used for providers
+            name: provider.business_name,
+            role: 'admin'
+          })
+        }
       }
+      
+      setIsLoading(false)
     }
-    setIsLoading(false)
+
+    initAuth()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        // Fetch provider data
+        const { data: provider } = await (supabase as any)
+          .from('providers')
+          .select('business_name, sub_url')
+          .eq('id', session.user.id)
+          .maybeSingle()
+
+        if (provider) {
+          setUser({
+            id: session.user.id,
+            mobile_number: '',
+            name: provider.business_name,
+            role: 'admin'
+          })
+        }
+      } else {
+        setUser(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const login = (mobile_number: string): boolean => {
-    console.log("[v0] Attempting login with mobile:", mobile_number)
-    const authUser = dataStore.login(mobile_number)
-    console.log("[v0] Login result:", authUser)
-    if (authUser) {
-      setUser(authUser)
-      localStorage.setItem("appetyte_user", JSON.stringify(authUser))
-      console.log("[v0] User logged in successfully:", authUser)
-      return true
-    }
-    console.log("[v0] Login failed - user not found")
+    // Legacy mobile login - not used for providers
     return false
   }
 
-  const logout = () => {
-    dataStore.logout()
+  const logout = async () => {
+    await supabase.auth.signOut()
     setUser(null)
-    localStorage.removeItem("appetyte_user")
   }
 
   return <AuthContext.Provider value={{ user, login, logout, isLoading }}>{children}</AuthContext.Provider>
