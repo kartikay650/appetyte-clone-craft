@@ -30,10 +30,10 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="font-medium">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/provider-login")} className="font-medium">
                 Log in
               </Button>
-              <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold rounded-lg shadow-sm">
+              <Button size="sm" onClick={() => navigate("/provider-signup")} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold rounded-lg shadow-sm">
                 Sign up
               </Button>
             </div>
@@ -71,7 +71,7 @@ export default function LandingPage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center pt-3">
-              <Button size="default" className="bg-[#FFB703] text-[#1a0b2e] hover:bg-[#FFA500] font-semibold px-6 h-11 rounded-lg shadow-sm hover:shadow-md transition-all">
+              <Button size="default" onClick={() => navigate("/provider-signup")} className="bg-[#FFB703] text-[#1a0b2e] hover:bg-[#FFA500] font-semibold px-6 h-11 rounded-lg shadow-sm hover:shadow-md transition-all">
                 Sign up for free
               </Button>
               
@@ -236,7 +236,7 @@ export default function LandingPage() {
               Join hundreds of tiffin providers who trust Appetyte to manage their daily operations.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
+              <Button size="lg" onClick={() => navigate("/provider-signup")} variant="secondary" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
                 Start Free Trial
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

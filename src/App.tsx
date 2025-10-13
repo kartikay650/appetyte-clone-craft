@@ -9,6 +9,8 @@ import Index from "./pages/Index"
 import AdminPage from "./pages/AdminPage"
 import CustomerPage from "./pages/CustomerPage"
 import NotFound from "./pages/NotFound"
+import ProviderSignup from "./pages/ProviderSignup"
+import ProviderLogin from "./pages/ProviderLogin"
 import "./App.css"
 
 const queryClient = new QueryClient()
@@ -22,6 +24,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/provider-signup" element={<ProviderSignup />} />
+            <Route path="/provider-login" element={<ProviderLogin />} />
             <Route path="/dashboard" element={<Index />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/customer" element={<CustomerPage />} />
