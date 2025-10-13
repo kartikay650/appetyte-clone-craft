@@ -17,30 +17,67 @@ interface Meal {
 
 interface CustomerDashboardProps {
   providerId: string
+  customerId: string
 }
 
-export function CustomerDashboard({ providerId }: CustomerDashboardProps) {
+export function CustomerDashboard({ providerId, customerId }: CustomerDashboardProps) {
   const [meals, setMeals] = useState<Meal[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    const loadMeals = async () => {
+      setIsLoading(true)
+      const today = new Date().toISOString().split('T')[0]
+      
+      const { data: mealsData } = await supabase
+        .from('meals')
+        .select('*')
+        .eq('provider_id', providerId)
+        .eq('date', today)
+        .order('meal_type', { ascending: true })
+
+      setMeals(mealsData || [])
+      setIsLoading(false)
+    }
+
     loadMeals()
+
+    // Set up Realtime subscription for meal updates
+    const channel = supabase
+      .channel('customer-meals')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'meals',
+          filter: `provider_id=eq.${providerId}`,
+        },
+        (payload) => {
+          const today = new Date().toISOString().split('T')[0]
+          
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const meal = payload.new as Meal
+            if (meal.date === today) {
+              setMeals((current) => {
+                const existing = current.find(m => m.id === meal.id)
+                if (existing) {
+                  return current.map(m => m.id === meal.id ? meal : m)
+                }
+                return [...current, meal].sort((a, b) => a.meal_type.localeCompare(b.meal_type))
+              })
+            }
+          } else if (payload.eventType === 'DELETE') {
+            setMeals((current) => current.filter(m => m.id !== payload.old.id))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [providerId])
-
-  const loadMeals = async () => {
-    setIsLoading(true)
-    const today = new Date().toISOString().split('T')[0]
-    
-    const { data: mealsData } = await (supabase as any)
-      .from('meals')
-      .select('*')
-      .eq('provider_id', providerId)
-      .eq('date', today)
-      .order('meal_type', { ascending: true })
-
-    setMeals(mealsData || [])
-    setIsLoading(false)
-  }
 
   if (isLoading) {
     return (
@@ -74,7 +111,12 @@ export function CustomerDashboard({ providerId }: CustomerDashboardProps) {
             </div>
           ) : (
             todaysMeals.map((meal) => (
-              <MealCard key={meal.id} meal={meal} onOrderPlaced={loadMeals} />
+              <MealCard 
+                key={meal.id} 
+                meal={meal} 
+                customerId={customerId}
+                providerId={providerId}
+              />
             ))
           )}
         </TabsContent>

@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Clock, IndianRupee, AlertTriangle } from "lucide-react"
 import { useOrderingStatus } from "@/hooks/use-time-updates"
 import { formatTime } from "@/lib/utils/time"
+import { supabase } from "@/integrations/supabase/client"
+import { toast } from "@/hooks/use-toast"
 
 interface Meal {
   id: string
@@ -21,11 +23,13 @@ interface Meal {
 
 interface MealCardProps {
   meal: Meal
-  onOrderPlaced: () => void
+  customerId: string
+  providerId: string
 }
 
-export function MealCard({ meal }: MealCardProps) {
+export function MealCard({ meal, customerId, providerId }: MealCardProps) {
   const [selectedOption, setSelectedOption] = useState(meal.option_1)
+  const [isOrdering, setIsOrdering] = useState(false)
 
   const { isOrderingAllowed, timeUntilCutoff } = useOrderingStatus(meal.cut_off_time, meal.date)
 
@@ -53,6 +57,58 @@ export function MealCard({ meal }: MealCardProps) {
   }
 
   const urgencyLevel = getUrgencyLevel()
+
+  const handlePlaceOrder = async () => {
+    if (!isOrderingAllowed) {
+      toast({
+        title: "Ordering closed",
+        description: "The ordering window for this meal has closed.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsOrdering(true)
+
+    try {
+      // Fetch customer details for delivery address
+      const { data: customer, error: customerError } = await supabase
+        .from("customers")
+        .select("address")
+        .eq("id", customerId)
+        .single()
+
+      if (customerError) throw customerError
+
+      // Create order
+      const { error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          customer_id: customerId,
+          provider_id: providerId,
+          meal_id: meal.id,
+          selected_option: selectedOption,
+          amount: meal.price,
+          delivery_address: customer.address,
+          status: "pending",
+        })
+
+      if (orderError) throw orderError
+
+      toast({
+        title: "Order placed successfully!",
+        description: `Your order for ${meal.meal_type} (${selectedOption}) has been placed.`,
+      })
+    } catch (error: any) {
+      toast({
+        title: "Failed to place order",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setIsOrdering(false)
+    }
+  }
 
   return (
     <Card
@@ -103,7 +159,7 @@ export function MealCard({ meal }: MealCardProps) {
             value={selectedOption}
             onValueChange={setSelectedOption}
             className="mt-2"
-            disabled={true}
+            disabled={!isOrderingAllowed}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value={meal.option_1} id={`${meal.id}-option1`} />
@@ -122,11 +178,13 @@ export function MealCard({ meal }: MealCardProps) {
           </RadioGroup>
         </div>
 
-        <div className="bg-muted/50 border rounded-lg p-3 text-center">
-          <p className="text-sm text-muted-foreground">
-            Customer ordering will be available soon. Please contact the provider to place your order.
-          </p>
-        </div>
+        <Button
+          className="w-full"
+          disabled={!isOrderingAllowed || isOrdering}
+          onClick={handlePlaceOrder}
+        >
+          {isOrdering ? "Placing order..." : isOrderingAllowed ? "Place Order" : "Ordering Closed"}
+        </Button>
       </CardContent>
     </Card>
   )

@@ -2,15 +2,19 @@ import { useParams, Navigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { CustomerDashboard } from "@/components/customer/customer-dashboard"
+import { CustomerAuth } from "@/components/customer/CustomerAuth"
+import type { User } from "@supabase/supabase-js"
 
 export default function ProviderCustomerPage() {
   const { subUrl } = useParams<{ subUrl: string }>()
   const [providerId, setProviderId] = useState<string | null>(null)
+  const [customer, setCustomer] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const checkProvider = async () => {
-      const { data: provider, error } = await (supabase as any)
+    const checkProviderAndAuth = async () => {
+      // Check 1: Validate provider exists
+      const { data: provider, error } = await supabase
         .from('providers')
         .select('id')
         .eq('sub_url', subUrl)
@@ -23,10 +27,21 @@ export default function ProviderCustomerPage() {
       }
 
       setProviderId(provider.id)
+
+      // Check 2: Check customer session
+      const { data: { user } } = await supabase.auth.getUser()
+      setCustomer(user)
       setIsLoading(false)
     }
 
-    checkProvider()
+    checkProviderAndAuth()
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCustomer(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
   }, [subUrl])
 
   if (isLoading) {
@@ -44,9 +59,14 @@ export default function ProviderCustomerPage() {
     return <Navigate to="/" replace />
   }
 
+  // If no customer session, show auth page
+  if (!customer) {
+    return <CustomerAuth providerId={providerId} />
+  }
+
   return (
     <main className="container mx-auto px-4 py-4 sm:py-6 max-w-4xl">
-      <CustomerDashboard providerId={providerId} />
+      <CustomerDashboard providerId={providerId} customerId={customer.id} />
     </main>
   )
 }

@@ -19,6 +19,7 @@ export type Database = {
           address: string
           created_at: string
           current_balance: number
+          email: string | null
           id: string
           mobile_number: string
           name: string
@@ -28,6 +29,7 @@ export type Database = {
           address: string
           created_at?: string
           current_balance?: number
+          email?: string | null
           id?: string
           mobile_number: string
           name: string
@@ -37,6 +39,7 @@ export type Database = {
           address?: string
           created_at?: string
           current_balance?: number
+          email?: string | null
           id?: string
           mobile_number?: string
           name?: string
