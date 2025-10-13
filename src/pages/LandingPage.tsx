@@ -7,7 +7,7 @@ export default function LandingPage() {
   return <div className="min-h-screen bg-background">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
-        <div className="container mx-auto px-6 md:px-12 lg:px-24">
+        <div className="max-w-full px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -36,8 +36,8 @@ export default function LandingPage() {
       <section className="relative overflow-hidden" style={{
       background: 'radial-gradient(ellipse at top center, #FFD88D 0%, #FFEAC4 30%, #FFF5E1 60%, #FFFBF5 100%)'
     }}>
-        <div className="py-12 md:py-20 lg:py-24">
-          <div className="max-w-4xl mx-auto text-center space-y-5 animate-fade-in">
+        <div className="py-12 md:py-20 lg:py-24 px-4">
+          <div className="max-w-full mx-auto text-center space-y-5 animate-fade-in">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-foreground text-background px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
               <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded text-[10px] font-bold">NEW</span>
@@ -93,13 +93,14 @@ export default function LandingPage() {
 
       {/* Demo Video Section */}
       <section className="bg-white py-16">
-        <div className="container mx-auto px-6 md:px-12 lg:px-24">
+        <div className="max-w-full px-4">
           
         </div>
       </section>
 
       {/* Key Features Section */}
-      <section id="features" className="container mx-auto px-6 md:px-12 lg:px-24 py-20 bg-accent/30">
+      <section id="features" className="py-20 bg-accent/30">
+        <div className="max-w-full px-4">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Built for home chefs and tiffin services
@@ -142,10 +143,12 @@ export default function LandingPage() {
               </CardContent>
             </Card>)}
         </div>
+        </div>
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="container mx-auto px-6 md:px-12 lg:px-24 py-20">
+      <section id="how-it-works" className="py-20">
+        <div className="max-w-full px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             How It Works
@@ -155,7 +158,7 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-full mx-auto">
           {[{
           step: "01",
           title: "Create your account",
@@ -181,10 +184,12 @@ export default function LandingPage() {
               {index < 2 && <div className="hidden md:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-gradient-to-r from-primary/50 to-transparent"></div>}
             </div>)}
         </div>
+        </div>
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="container mx-auto px-6 md:px-12 lg:px-24 py-20 bg-accent/30">
+      <section id="testimonials" className="py-20 bg-accent/30">
+        <div className="max-w-full px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Loved by tiffin providers and customers alike
@@ -223,10 +228,11 @@ export default function LandingPage() {
               </CardContent>
             </Card>)}
         </div>
+        </div>
       </section>
 
       {/* CTA Section */}
-      <section className="container mx-auto px-6 md:px-12 lg:px-24 py-20">
+      <section className="py-20 px-4">
         <Card className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border-0">
           <CardContent className="p-12 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -250,7 +256,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer id="footer" className="border-t bg-muted/30">
-        <div className="container mx-auto px-6 md:px-12 lg:px-24 py-12">
+        <div className="max-w-full px-4 py-12">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div className="space-y-4">
               <h3 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
