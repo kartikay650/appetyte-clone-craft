@@ -24,52 +24,24 @@ export default function ProviderLogin() {
         password,
       })
 
-      if (authError) {
-        console.error('Auth error:', authError)
-        throw authError
-      }
-
-      if (!authData?.user?.id) {
-        throw new Error('No user returned from login')
-      }
-
-      console.log('Logged in user ID:', authData.user.id)
+      if (authError) throw authError
+      if (!authData?.user?.id) throw new Error('Login failed')
 
       const { data: provider, error: providerError } = await supabase
         .from('providers')
         .select('sub_url')
         .eq('id', authData.user.id)
-        .single()
+        .maybeSingle()
 
-      console.log('Provider result:', { provider, providerError })
+      if (providerError) throw providerError
+      if (!provider?.sub_url) throw new Error('Provider account not found')
 
-      if (providerError) {
-        console.error('Provider error:', providerError)
-        throw new Error(`Database error: ${providerError.message}`)
-      }
-      
-      if (!provider || !provider.sub_url) {
-        throw new Error('No provider account found for this email')
-      }
-
-      console.log('Redirecting to:', `/${provider.sub_url}/admin`)
-
-      toast({
-        title: "Success!",
-        description: "Redirecting to your dashboard...",
-      })
-
-      // Force navigation
-      setTimeout(() => {
-        window.location.href = `/${provider.sub_url}/admin`
-      }, 500)
-
+      window.location.href = `/${provider.sub_url}/admin`
     } catch (error: any) {
-      console.error('Full error:', error)
       setIsLoading(false)
       toast({
         title: "Login Failed",
-        description: error.message || "Something went wrong",
+        description: error.message || "Invalid credentials",
         variant: "destructive",
       })
     }
