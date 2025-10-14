@@ -53,7 +53,6 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
   const [balance, setBalance] = useState<number>(0)
   const [customerAddress, setCustomerAddress] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
-  const [customerError, setCustomerError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadData = async () => {
@@ -89,13 +88,7 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
         .from('customers')
         .select('current_balance, address')
         .eq('id', customerId)
-        .maybeSingle()
-
-      if (!customerData) {
-        setCustomerError("Your account setup is incomplete. Please contact support.")
-        setIsLoading(false)
-        return
-      }
+        .single()
 
       setMeals(mealsData || [])
       setOrders(ordersData || [])
@@ -222,17 +215,6 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
           <p>Loading meals...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (customerError) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-center space-y-4">
-          <div className="text-destructive font-semibold">Account Setup Error</div>
-          <p className="text-muted-foreground">{customerError}</p>
         </div>
       </div>
     )
