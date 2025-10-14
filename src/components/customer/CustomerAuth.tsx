@@ -19,7 +19,6 @@ export function CustomerAuth({ providerId }: CustomerAuthProps) {
   const [signupEmail, setSignupEmail] = useState("")
   const [signupPassword, setSignupPassword] = useState("")
   const [signupMobile, setSignupMobile] = useState("")
-  const [signupAddress, setSignupAddress] = useState("")
   
   // Login state
   const [loginEmail, setLoginEmail] = useState("")
@@ -50,7 +49,7 @@ export function CustomerAuth({ providerId }: CustomerAuthProps) {
           name: signupName,
           email: signupEmail,
           mobile_number: signupMobile,
-          address: signupAddress,
+          address: null,
           provider_id: providerId,
         })
 
@@ -66,7 +65,6 @@ export function CustomerAuth({ providerId }: CustomerAuthProps) {
       setSignupEmail("")
       setSignupPassword("")
       setSignupMobile("")
-      setSignupAddress("")
     } catch (error: any) {
       toast({
         title: "Signup failed",
@@ -176,16 +174,6 @@ export function CustomerAuth({ providerId }: CustomerAuthProps) {
                     type="tel"
                     value={signupMobile}
                     onChange={(e) => setSignupMobile(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-address">Address</Label>
-                  <Input
-                    id="signup-address"
-                    type="text"
-                    value={signupAddress}
-                    onChange={(e) => setSignupAddress(e.target.value)}
                     required
                   />
                 </div>

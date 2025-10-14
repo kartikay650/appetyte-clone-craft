@@ -16,7 +16,7 @@ export type Database = {
     Tables: {
       customers: {
         Row: {
-          address: string
+          address: string | null
           created_at: string
           current_balance: number
           email: string | null
@@ -26,7 +26,7 @@ export type Database = {
           provider_id: string
         }
         Insert: {
-          address: string
+          address?: string | null
           created_at?: string
           current_balance?: number
           email?: string | null
@@ -36,7 +36,7 @@ export type Database = {
           provider_id: string
         }
         Update: {
-          address?: string
+          address?: string | null
           created_at?: string
           current_balance?: number
           email?: string | null
