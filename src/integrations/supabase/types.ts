@@ -255,6 +255,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ensure_customer_record: {
+        Args: { p_provider_id: string; p_user_id: string }
+        Returns: undefined
+      }
       place_order_atomic: {
         Args: {
           p_amount: number

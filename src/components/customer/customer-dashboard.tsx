@@ -6,6 +6,7 @@ import { BalanceCard } from "./balance-card"
 import { PaymentHistory } from "./payment-history"
 import { CustomerHeader } from "./CustomerHeader"
 import { supabase } from "@/integrations/supabase/client"
+import { toast } from "@/hooks/use-toast"
 
 interface Payment {
   id: string
@@ -57,6 +58,26 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true)
+      
+      // Ensure customer record exists (for users who signed up before trigger was added)
+      try {
+        const { error: ensureError } = await supabase.rpc('ensure_customer_record', {
+          p_user_id: customerId,
+          p_provider_id: providerId
+        })
+        
+        if (ensureError) {
+          console.error('Error ensuring customer record:', ensureError)
+          toast({
+            title: "Account Setup Issue",
+            description: "There was a problem setting up your account. Please contact support.",
+            variant: "destructive"
+          })
+        }
+      } catch (err) {
+        console.error('Failed to ensure customer record:', err)
+      }
+      
       const today = new Date().toISOString().split('T')[0]
       
       // Fetch meals
