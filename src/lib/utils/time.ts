@@ -150,10 +150,10 @@ export function getNextMealTime(): { mealType: string; cutoffTime: string } | nu
 export function isMealEditable(mealDate: string, cutoffTime: string): boolean {
   const now = new Date()
   
-  // Create full cutoff timestamp (date + time) - using local timezone
+  // Create full cutoff timestamp (date + time)
   const [hours, minutes] = cutoffTime.split(":").map(Number)
-  // Parse date in local timezone by appending time
-  const cutoffTimestamp = new Date(`${mealDate}T${cutoffTime}:00`)
+  const cutoffTimestamp = new Date(mealDate)
+  cutoffTimestamp.setHours(hours, minutes, 0, 0)
   
   // Meal is editable if current time is before the full cutoff timestamp
   return now < cutoffTimestamp
@@ -163,9 +163,10 @@ export function isMealEditable(mealDate: string, cutoffTime: string): boolean {
 export function shouldShowMealToCustomer(mealDate: string, cutoffTime: string): boolean {
   const now = new Date()
   
-  // Create full cutoff timestamp (date + time) - using local timezone
-  // Parse date in local timezone by appending time
-  const cutoffTimestamp = new Date(`${mealDate}T${cutoffTime}:00`)
+  // Create full cutoff timestamp (date + time)
+  const [hours, minutes] = cutoffTime.split(":").map(Number)
+  const cutoffTimestamp = new Date(mealDate)
+  cutoffTimestamp.setHours(hours, minutes, 0, 0)
   
   // Add 15-minute grace period
   const cutoffWithGrace = new Date(cutoffTimestamp.getTime() + 15 * 60 * 1000)

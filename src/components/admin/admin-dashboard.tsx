@@ -41,10 +41,6 @@ interface Order {
   status: string
   amount: number
   timestamp: string
-  notes?: string
-  customers?: {
-    name: string
-  }
 }
 
 export function AdminDashboard() {
@@ -83,10 +79,10 @@ export function AdminDashboard() {
       .eq('provider_id', user.id)
       .order('created_at', { ascending: false })
     
-    // Fetch orders with customer data
+    // Fetch orders
     const { data: ordersData } = await (supabase as any)
       .from('orders')
-      .select('*, customers(name)')
+      .select('*')
       .eq('provider_id', user.id)
       .order('timestamp', { ascending: false })
 
