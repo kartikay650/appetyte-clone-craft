@@ -149,34 +149,28 @@ export function getNextMealTime(): { mealType: string; cutoffTime: string } | nu
 // Check if meal can be edited by admin (current time < cutoff time)
 export function isMealEditable(mealDate: string, cutoffTime: string): boolean {
   const now = new Date()
-  const today = now.toISOString().split("T")[0]
   
-  // Can't edit past meals
-  if (mealDate < today) return false
-  
-  // Can edit future meals
-  if (mealDate > today) return true
-  
-  // For today's meals, check cutoff time
+  // Create full cutoff timestamp (date + time)
   const [hours, minutes] = cutoffTime.split(":").map(Number)
-  const cutoff = new Date()
-  cutoff.setHours(hours, minutes, 0, 0)
+  const cutoffTimestamp = new Date(mealDate)
+  cutoffTimestamp.setHours(hours, minutes, 0, 0)
   
-  return now < cutoff
+  // Meal is editable if current time is before the full cutoff timestamp
+  return now < cutoffTimestamp
 }
 
 // Check if meal should be visible to customer (includes 15-minute grace period)
 export function shouldShowMealToCustomer(mealDate: string, cutoffTime: string): boolean {
   const now = new Date()
-  const today = now.toISOString().split("T")[0]
   
-  // Don't show past or future date meals
-  if (mealDate !== today) return false
-  
-  // Calculate cutoff time + 15 minutes grace period
+  // Create full cutoff timestamp (date + time)
   const [hours, minutes] = cutoffTime.split(":").map(Number)
-  const cutoffWithGrace = new Date()
-  cutoffWithGrace.setHours(hours, minutes + 15, 0, 0)
+  const cutoffTimestamp = new Date(mealDate)
+  cutoffTimestamp.setHours(hours, minutes, 0, 0)
   
+  // Add 15-minute grace period
+  const cutoffWithGrace = new Date(cutoffTimestamp.getTime() + 15 * 60 * 1000)
+  
+  // Meal is visible only if current time is before cutoff + grace period
   return now < cutoffWithGrace
 }
