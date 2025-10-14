@@ -21,20 +21,13 @@ export function useOrderingStatus(cutoffTime: string, mealDate: string) {
 
   const isOrderingAllowed = () => {
     const now = new Date()
-    const today = now.toISOString().split("T")[0]
-
-    // Can't order for past dates
-    if (mealDate < today) return false
-
-    // Can't order for future dates (more than today)
-    if (mealDate > today) return false
-
-    // Check cutoff time for today
+    
+    // Create cutoff timestamp by combining meal date and cutoff time
     const [hours, minutes] = cutoffTime.split(":").map(Number)
-    const cutoff = new Date()
-    cutoff.setHours(hours, minutes, 0, 0)
+    const cutoffTimestamp = new Date(mealDate)
+    cutoffTimestamp.setHours(hours, minutes, 0, 0)
 
-    return now < cutoff
+    return now < cutoffTimestamp
   }
 
   const getTimeUntilCutoff = () => {
