@@ -5,6 +5,8 @@ import { OrderManagement } from "./order-management"
 import { CustomerManagement } from "./customer-management"
 import { ReportsOverview } from "./reports-overview"
 import { TimeStatusWidget } from "./time-status-widget"
+import { RealTimeNotifications } from "./real-time-notifications"
+import { ProviderDeliverySettings } from "./provider-delivery-settings"
 import { supabase } from "@/integrations/supabase/client"
 
 interface Meal {
@@ -45,6 +47,7 @@ export function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([])
   const [customers, setCustomers] = useState<Customer[]>([])
   const [meals, setMeals] = useState<Meal[]>([])
+  const [providerId, setProviderId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -59,6 +62,8 @@ export function AdminDashboard() {
       setIsLoading(false)
       return
     }
+
+    setProviderId(user.id)
 
     // Fetch meals
     const { data: mealsData } = await (supabase as any)
@@ -100,19 +105,23 @@ export function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-balance">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Manage your tiffin service business</p>
+      <div className="flex items-center justify-between">
+        <div className="text-center flex-1">
+          <h1 className="text-3xl font-bold text-balance">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Manage your tiffin service business</p>
+        </div>
+        {providerId && <RealTimeNotifications providerId={providerId} />}
       </div>
 
       <TimeStatusWidget />
 
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="meals">Meals</TabsTrigger>
           <TabsTrigger value="customers">Customers</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders">
@@ -129,6 +138,10 @@ export function AdminDashboard() {
 
         <TabsContent value="reports">
           <ReportsOverview orders={orders} customers={customers} meals={meals} />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          {providerId && <ProviderDeliverySettings providerId={providerId} />}
         </TabsContent>
       </Tabs>
     </div>

@@ -90,6 +90,7 @@ export type Database = {
           delivery_address: string
           id: string
           meal_id: string
+          notes: string | null
           provider_id: string
           selected_option: string
           status: string
@@ -101,6 +102,7 @@ export type Database = {
           delivery_address: string
           id?: string
           meal_id: string
+          notes?: string | null
           provider_id: string
           selected_option: string
           status?: string
@@ -112,6 +114,7 @@ export type Database = {
           delivery_address?: string
           id?: string
           meal_id?: string
+          notes?: string | null
           provider_id?: string
           selected_option?: string
           status?: string
@@ -178,6 +181,7 @@ export type Database = {
           business_name: string
           contact_number: string
           created_at: string
+          delivery_settings_json: Json | null
           email_id: string
           id: string
           owner_name: string
@@ -190,6 +194,7 @@ export type Database = {
           business_name: string
           contact_number: string
           created_at?: string
+          delivery_settings_json?: Json | null
           email_id: string
           id?: string
           owner_name: string
@@ -202,6 +207,7 @@ export type Database = {
           business_name?: string
           contact_number?: string
           created_at?: string
+          delivery_settings_json?: Json | null
           email_id?: string
           id?: string
           owner_name?: string
@@ -211,12 +217,56 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          amount: number
+          customer_id: string
+          id: string
+          metadata: Json | null
+          order_id: string | null
+          provider_id: string
+          timestamp: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          customer_id: string
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          provider_id: string
+          timestamp?: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          customer_id?: string
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          provider_id?: string
+          timestamp?: string
+          type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      place_order_atomic: {
+        Args: {
+          p_amount: number
+          p_customer_id: string
+          p_delivery_address: string
+          p_meal_id: string
+          p_notes?: string
+          p_provider_id: string
+          p_selected_option: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

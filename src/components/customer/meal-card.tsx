@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Clock, IndianRupee, AlertTriangle, MapPin, CheckCircle } from "lucide-react"
 import { useOrderingStatus } from "@/hooks/use-time-updates"
 import { formatTime } from "@/lib/utils/time"
@@ -31,6 +32,7 @@ interface Order {
   status: string
   amount: number
   timestamp: string
+  notes?: string
 }
 
 interface MealCardProps {
@@ -44,11 +46,42 @@ interface MealCardProps {
 export function MealCard({ meal, customerId, providerId, existingOrder, deliveryAddress }: MealCardProps) {
   const [selectedOption, setSelectedOption] = useState(meal.option_1)
   const [isOrdering, setIsOrdering] = useState(false)
+  const [notes, setNotes] = useState("")
+  const [showNotes, setShowNotes] = useState(false)
+  const [customAddress, setCustomAddress] = useState(deliveryAddress || "")
+  const [deliveryMode, setDeliveryMode] = useState<"custom" | "fixed">("custom")
+  const [fixedAddress, setFixedAddress] = useState("")
 
   const { isOrderingAllowed, timeUntilCutoff } = useOrderingStatus(meal.cut_off_time, meal.date)
   
   // Check if customer has already ordered this meal
   const hasOrdered = !!existingOrder
+
+  // Fetch delivery settings
+  useEffect(() => {
+    const fetchDeliverySettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("providers")
+          .select("delivery_settings_json")
+          .eq("id", providerId)
+          .single()
+
+        if (error) throw error
+
+        const settings = (data?.delivery_settings_json as unknown || { mode: "custom" }) as { mode: "custom" | "fixed"; fixedAddress?: string }
+        setDeliveryMode(settings.mode)
+        if (settings.mode === "fixed" && settings.fixedAddress) {
+          setFixedAddress(settings.fixedAddress)
+          setCustomAddress(settings.fixedAddress)
+        }
+      } catch (error) {
+        console.error("Error fetching delivery settings:", error)
+      }
+    }
+
+    fetchDeliverySettings()
+  }, [providerId])
 
   const getMealTypeColor = (mealType: string) => {
     switch (mealType) {
@@ -93,6 +126,8 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
   }
 
   const handlePlaceOrder = async () => {
+    const finalAddress = deliveryMode === "fixed" ? fixedAddress : customAddress
+
     if (!isOrderingAllowed) {
       toast({
         title: "Ordering closed",
@@ -102,10 +137,10 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
       return
     }
 
-    if (!deliveryAddress) {
+    if (!finalAddress) {
       toast({
         title: "No delivery address",
-        description: "Please update your profile with a delivery address.",
+        description: "Please enter a delivery address.",
         variant: "destructive",
       })
       return
@@ -114,29 +149,38 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
     setIsOrdering(true)
 
     try {
-      // Create order
-      const { error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          customer_id: customerId,
-          provider_id: providerId,
-          meal_id: meal.id,
-          selected_option: selectedOption,
-          amount: meal.price,
-          delivery_address: deliveryAddress,
-          status: "pending",
-        })
-
-      if (orderError) throw orderError
-
-      toast({
-        title: "Order placed successfully!",
-        description: `Your order for ${selectedOption} has been placed.`,
+      // Use atomic transaction function
+      const { data, error } = await supabase.rpc("place_order_atomic", {
+        p_customer_id: customerId,
+        p_provider_id: providerId,
+        p_meal_id: meal.id,
+        p_selected_option: selectedOption,
+        p_delivery_address: finalAddress,
+        p_amount: meal.price,
+        p_notes: showNotes ? notes : null,
       })
-    } catch (error: any) {
+
+      if (error) throw error
+
       toast({
-        title: "Failed to place order",
-        description: error.message,
+        title: "Order Placed!",
+        description: `Your ${selectedOption} order has been placed successfully.`,
+      })
+
+      // Reset form
+      setNotes("")
+      setShowNotes(false)
+    } catch (error: any) {
+      console.error("Error placing order:", error)
+      
+      let errorMessage = "Failed to place order. Please try again."
+      if (error.message?.includes("Insufficient balance")) {
+        errorMessage = "Insufficient balance. Please add funds to your account."
+      }
+      
+      toast({
+        title: "Order Failed",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
@@ -183,6 +227,16 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
                 <p className="text-sm">{existingOrder.delivery_address}</p>
               </div>
             </div>
+
+            {existingOrder.notes && (
+              <div className="flex items-start gap-2">
+                <div className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground">Notes:</p>
+                  <p className="text-sm">{existingOrder.notes}</p>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -258,26 +312,59 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
           </RadioGroup>
         </div>
 
-        {deliveryAddress && (
-          <div className="bg-muted rounded-lg p-3">
-            <div className="flex items-start gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground">Delivery to:</p>
-                <p className="text-sm">{deliveryAddress}</p>
+        <div>
+          {deliveryMode === "custom" ? (
+            <div className="space-y-2">
+              <Label htmlFor="customAddress">Delivery Address</Label>
+              <Input
+                id="customAddress"
+                value={customAddress}
+                onChange={(e) => setCustomAddress(e.target.value)}
+                placeholder="Enter delivery address"
+              />
+            </div>
+          ) : (
+            <div className="bg-muted rounded-lg p-3">
+              <div className="flex items-start gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground">Delivery to:</p>
+                  <p className="text-sm">{fixedAddress}</p>
+                </div>
               </div>
             </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="orderNotes">Add notes (optional)</Label>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowNotes(!showNotes)}
+            >
+              {showNotes ? "Hide" : "Show"}
+            </Button>
           </div>
-        )}
+          {showNotes && (
+            <Input
+              id="orderNotes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Any special instructions?"
+            />
+          )}
+        </div>
 
         <Button
           className="w-full"
-          disabled={!isOrderingAllowed || isOrdering || !deliveryAddress}
+          disabled={!isOrderingAllowed || isOrdering || !customAddress}
           onClick={handlePlaceOrder}
         >
           {isOrdering 
             ? "Placing order..." 
-            : !deliveryAddress 
+            : !customAddress 
             ? "No delivery address set" 
             : isOrderingAllowed 
             ? "Place Order" 
