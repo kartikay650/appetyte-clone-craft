@@ -18,6 +18,10 @@ interface Order {
   status: string
   amount: number
   timestamp: string
+  notes?: string
+  customers?: {
+    name: string
+  }
 }
 
 interface OrderManagementProps {
@@ -138,7 +142,7 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
                   <div>
                     <CardTitle className="text-base flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      Order {order.id.slice(0, 8)}
+                      {order.customers?.name ? `Order from ${order.customers.name}` : `Order ${order.id.slice(0, 8)}`}
                     </CardTitle>
                     <CardDescription className="flex items-center gap-4 mt-1">
                       <span className="flex items-center gap-1">
@@ -163,6 +167,13 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
                     <MapPin className="h-3 w-3" />
                     <strong>Delivery to:</strong> {order.delivery_address}
                   </p>
+                  {order.notes && (
+                    <div className="mt-2 p-2 bg-muted rounded-md">
+                      <p className="text-sm">
+                        <strong>Special Instructions:</strong> {order.notes}
+                      </p>
+                    </div>
+                  )}
                   <p className="text-xs text-muted-foreground mt-1">Order ID: {order.id}</p>
                 </div>
 
