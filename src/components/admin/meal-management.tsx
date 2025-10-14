@@ -5,10 +5,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Plus, IndianRupee, Clock } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Plus, IndianRupee, Clock, Pencil, Trash2 } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { formatTime, formatDate } from "@/lib/utils/time"
+import { formatTime, formatDate, isMealEditable } from "@/lib/utils/time"
 
 interface Meal {
   id: string
@@ -30,6 +41,8 @@ interface MealManagementProps {
 export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
   const { toast } = useToast()
   const [showAddForm, setShowAddForm] = useState(false)
+  const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
+  const [deleteConfirmMealId, setDeleteConfirmMealId] = useState<string | null>(null)
   const [newMeal, setNewMeal] = useState({
     date: new Date().toISOString().split("T")[0],
     meal_type: "breakfast" as const,
@@ -62,31 +75,61 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
       return
     }
 
-    const { error } = await (supabase as any)
-      .from('meals')
-      .insert({
-        provider_id: user.id,
-        date: newMeal.date,
-        meal_type: newMeal.meal_type,
-        option_1: newMeal.option_1,
-        option_2: newMeal.option_2 || null,
-        price: Number.parseFloat(newMeal.price),
-        cut_off_time: newMeal.cut_off_time,
-      })
+    if (editingMeal) {
+      // Update existing meal
+      const { error } = await supabase
+        .from('meals')
+        .update({
+          date: newMeal.date,
+          meal_type: newMeal.meal_type,
+          option_1: newMeal.option_1,
+          option_2: newMeal.option_2 || null,
+          price: Number.parseFloat(newMeal.price),
+          cut_off_time: newMeal.cut_off_time,
+        })
+        .eq('id', editingMeal.id)
 
-    if (error) {
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update meal",
+          variant: "destructive",
+        })
+        return
+      }
+
       toast({
-        title: "Error",
-        description: "Failed to add meal",
-        variant: "destructive",
+        title: "Meal updated successfully",
+        description: `${newMeal.meal_type} for ${formatDate(newMeal.date)} has been updated`,
       })
-      return
-    }
+    } else {
+      // Insert new meal
+      const { error } = await supabase
+        .from('meals')
+        .insert({
+          provider_id: user.id,
+          date: newMeal.date,
+          meal_type: newMeal.meal_type,
+          option_1: newMeal.option_1,
+          option_2: newMeal.option_2 || null,
+          price: Number.parseFloat(newMeal.price),
+          cut_off_time: newMeal.cut_off_time,
+        })
 
-    toast({
-      title: "Meal added successfully",
-      description: `${newMeal.meal_type} for ${formatDate(newMeal.date)} has been added`,
-    })
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to add meal",
+          variant: "destructive",
+        })
+        return
+      }
+
+      toast({
+        title: "Meal added successfully",
+        description: `${newMeal.meal_type} for ${formatDate(newMeal.date)} has been added`,
+      })
+    }
 
     setNewMeal({
       date: new Date().toISOString().split("T")[0],
@@ -97,7 +140,58 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
       cut_off_time: "08:30",
     })
     setShowAddForm(false)
+    setEditingMeal(null)
     onMealUpdate()
+  }
+
+  const startEditMeal = (meal: Meal) => {
+    setEditingMeal(meal)
+    setNewMeal({
+      date: meal.date,
+      meal_type: meal.meal_type as any,
+      option_1: meal.option_1,
+      option_2: meal.option_2 || "",
+      price: meal.price.toString(),
+      cut_off_time: meal.cut_off_time,
+    })
+    setShowAddForm(true)
+  }
+
+  const handleDeleteMeal = async (mealId: string) => {
+    const { error } = await supabase
+      .from('meals')
+      .delete()
+      .eq('id', mealId)
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete meal",
+        variant: "destructive",
+      })
+      return
+    }
+
+    toast({
+      title: "Meal deleted successfully",
+      description: "The meal has been removed",
+    })
+
+    setDeleteConfirmMealId(null)
+    onMealUpdate()
+  }
+
+  const cancelEdit = () => {
+    setEditingMeal(null)
+    setShowAddForm(false)
+    setNewMeal({
+      date: new Date().toISOString().split("T")[0],
+      meal_type: "breakfast",
+      option_1: "",
+      option_2: "",
+      price: "",
+      cut_off_time: "08:30",
+    })
   }
 
   const getMealTypeColor = (mealType: string) => {
@@ -121,11 +215,73 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
     return mealOrder[a.meal_type] - mealOrder[b.meal_type]
   })
 
+  // Separate active and history meals
+  const activeMeals = sortedMeals.filter(meal => isMealEditable(meal.date, meal.cut_off_time))
+  const historyMeals = sortedMeals.filter(meal => !isMealEditable(meal.date, meal.cut_off_time))
+
+  const renderMealCard = (meal: Meal, showActions: boolean) => (
+    <Card key={meal.id}>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="capitalize flex items-center gap-2">
+              {meal.meal_type}
+              <Badge className={getMealTypeColor(meal.meal_type)}>{meal.meal_type}</Badge>
+            </CardTitle>
+            <CardDescription className="flex items-center gap-4 mt-2">
+              <span>{formatDate(meal.date)}</span>
+              <span className="flex items-center gap-1">
+                <IndianRupee className="h-4 w-4" />
+                {meal.price}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                Order by {formatTime(meal.cut_off_time)}
+              </span>
+            </CardDescription>
+          </div>
+          {showActions && (
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => startEditMeal(meal)}
+              >
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => setDeleteConfirmMealId(meal.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete
+              </Button>
+            </div>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <p className="text-sm">
+            <strong>Option 1:</strong> {meal.option_1}
+          </p>
+          {meal.option_2 && (
+            <p className="text-sm">
+              <strong>Option 2:</strong> {meal.option_2}
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold">Meal Management</h3>
-        <Button onClick={() => setShowAddForm(!showAddForm)}>
+        <Button onClick={() => { setShowAddForm(!showAddForm); if (showAddForm) cancelEdit(); }}>
           <Plus className="h-4 w-4 mr-2" />
           Add New Meal
         </Button>
@@ -134,8 +290,10 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
       {showAddForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Add New Meal</CardTitle>
-            <CardDescription>Create a new meal option for your customers</CardDescription>
+            <CardTitle>{editingMeal ? "Edit Meal" : "Add New Meal"}</CardTitle>
+            <CardDescription>
+              {editingMeal ? "Update meal details" : "Create a new meal option for your customers"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleAddMeal} className="space-y-4">
@@ -216,8 +374,8 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit">Add Meal</Button>
-                <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+                <Button type="submit">{editingMeal ? "Update Meal" : "Add Meal"}</Button>
+                <Button type="button" variant="outline" onClick={cancelEdit}>
                   Cancel
                 </Button>
               </div>
@@ -226,55 +384,59 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
         </Card>
       )}
 
-      <div className="grid gap-4">
-        {sortedMeals.map((meal) => (
-          <Card key={meal.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="capitalize flex items-center gap-2">
-                    {meal.meal_type}
-                    <Badge className={getMealTypeColor(meal.meal_type)}>{meal.meal_type}</Badge>
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-4 mt-2">
-                    <span>{formatDate(meal.date)}</span>
-                    <span className="flex items-center gap-1">
-                      <IndianRupee className="h-4 w-4" />
-                      {meal.price}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      Order by {formatTime(meal.cut_off_time)}
-                    </span>
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm">
-                  <strong>Option 1:</strong> {meal.option_1}
-                </p>
-                {meal.option_2 && (
-                  <p className="text-sm">
-                    <strong>Option 2:</strong> {meal.option_2}
-                  </p>
-                )}
-                <p className="text-xs text-muted-foreground">Meal ID: {meal.id}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <Tabs defaultValue="active" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="active">Active Meals</TabsTrigger>
+          <TabsTrigger value="history">Meal History</TabsTrigger>
+        </TabsList>
 
-        {sortedMeals.length === 0 && (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground">No meals created yet</p>
-              <p className="text-sm text-muted-foreground mt-1">Add your first meal to get started</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+        <TabsContent value="active" className="space-y-4 mt-4">
+          <div className="grid gap-4">
+            {activeMeals.map((meal) => renderMealCard(meal, true))}
+            
+            {activeMeals.length === 0 && (
+              <Card>
+                <CardContent className="text-center py-8">
+                  <p className="text-muted-foreground">No active meals</p>
+                  <p className="text-sm text-muted-foreground mt-1">Add a new meal to get started</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-4 mt-4">
+          <div className="grid gap-4">
+            {historyMeals.map((meal) => renderMealCard(meal, false))}
+            
+            {historyMeals.length === 0 && (
+              <Card>
+                <CardContent className="text-center py-8">
+                  <p className="text-muted-foreground">No meal history yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">Past meals will appear here</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <AlertDialog open={deleteConfirmMealId !== null} onOpenChange={(open) => !open && setDeleteConfirmMealId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Meal</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this meal? This action cannot be undone and will remove it from all customer portals.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => deleteConfirmMealId && handleDeleteMeal(deleteConfirmMealId)}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -145,3 +145,38 @@ export function getNextMealTime(): { mealType: string; cutoffTime: string } | nu
     cutoffTime: "08:30",
   }
 }
+
+// Check if meal can be edited by admin (current time < cutoff time)
+export function isMealEditable(mealDate: string, cutoffTime: string): boolean {
+  const now = new Date()
+  const today = now.toISOString().split("T")[0]
+  
+  // Can't edit past meals
+  if (mealDate < today) return false
+  
+  // Can edit future meals
+  if (mealDate > today) return true
+  
+  // For today's meals, check cutoff time
+  const [hours, minutes] = cutoffTime.split(":").map(Number)
+  const cutoff = new Date()
+  cutoff.setHours(hours, minutes, 0, 0)
+  
+  return now < cutoff
+}
+
+// Check if meal should be visible to customer (includes 15-minute grace period)
+export function shouldShowMealToCustomer(mealDate: string, cutoffTime: string): boolean {
+  const now = new Date()
+  const today = now.toISOString().split("T")[0]
+  
+  // Don't show past or future date meals
+  if (mealDate !== today) return false
+  
+  // Calculate cutoff time + 15 minutes grace period
+  const [hours, minutes] = cutoffTime.split(":").map(Number)
+  const cutoffWithGrace = new Date()
+  cutoffWithGrace.setHours(hours, minutes + 15, 0, 0)
+  
+  return now < cutoffWithGrace
+}

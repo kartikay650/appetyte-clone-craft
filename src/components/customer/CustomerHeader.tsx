@@ -17,25 +17,38 @@ interface CustomerHeaderProps {
   providerId: string
 }
 
-export function CustomerHeader({ customerId }: CustomerHeaderProps) {
+export function CustomerHeader({ customerId, providerId }: CustomerHeaderProps) {
   const [customerName, setCustomerName] = useState<string>("")
+  const [providerSubUrl, setProviderSubUrl] = useState<string>("")
   const navigate = useNavigate()
 
   useEffect(() => {
-    const fetchCustomerName = async () => {
-      const { data } = await supabase
+    const fetchData = async () => {
+      // Fetch customer name
+      const { data: customerData } = await supabase
         .from("customers")
         .select("name")
         .eq("id", customerId)
         .single()
 
-      if (data) {
-        setCustomerName(data.name)
+      if (customerData) {
+        setCustomerName(customerData.name)
+      }
+
+      // Fetch provider sub_url
+      const { data: providerData } = await supabase
+        .from("providers")
+        .select("sub_url")
+        .eq("id", providerId)
+        .single()
+
+      if (providerData) {
+        setProviderSubUrl(providerData.sub_url)
       }
     }
 
-    fetchCustomerName()
-  }, [customerId])
+    fetchData()
+  }, [customerId, providerId])
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut()
@@ -47,7 +60,8 @@ export function CustomerHeader({ customerId }: CustomerHeaderProps) {
         variant: "destructive",
       })
     } else {
-      navigate("/")
+      // Redirect to the provider's customer page
+      navigate(`/${providerSubUrl}/customer`)
     }
   }
 

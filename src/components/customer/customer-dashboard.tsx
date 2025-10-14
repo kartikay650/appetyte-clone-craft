@@ -7,6 +7,7 @@ import { PaymentHistory } from "./payment-history"
 import { CustomerHeader } from "./CustomerHeader"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "@/hooks/use-toast"
+import { shouldShowMealToCustomer } from "@/lib/utils/time"
 
 interface Payment {
   id: string
@@ -241,7 +242,10 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
     )
   }
 
-  const todaysMeals = meals.filter(meal => meal.date === new Date().toISOString().split('T')[0])
+  const todaysMeals = meals.filter(meal => {
+    const today = new Date().toISOString().split('T')[0]
+    return meal.date === today && shouldShowMealToCustomer(meal.date, meal.cut_off_time)
+  })
   
   // Group meals by type
   const groupedMeals = {
