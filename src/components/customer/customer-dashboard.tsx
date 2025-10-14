@@ -81,12 +81,13 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
       
       const today = new Date().toISOString().split('T')[0]
       
-      // Fetch meals
+      // Fetch meals for today and future dates
       const { data: mealsData } = await supabase
         .from('meals')
         .select('*')
         .eq('provider_id', providerId)
-        .eq('date', today)
+        .gte('date', today)
+        .order('date', { ascending: true })
         .order('meal_type', { ascending: true })
 
       // Fetch orders
@@ -138,13 +139,17 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
           
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const meal = payload.new as Meal
-            if (meal.date === today) {
+            if (meal.date >= today) {
               setMeals((current) => {
                 const existing = current.find(m => m.id === meal.id)
                 if (existing) {
                   return current.map(m => m.id === meal.id ? meal : m)
                 }
-                return [...current, meal].sort((a, b) => a.meal_type.localeCompare(b.meal_type))
+                return [...current, meal].sort((a, b) => {
+                  const dateCompare = a.date.localeCompare(b.date)
+                  if (dateCompare !== 0) return dateCompare
+                  return a.meal_type.localeCompare(b.meal_type)
+                })
               })
             }
           } else if (payload.eventType === 'DELETE') {
@@ -244,7 +249,8 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
 
   const todaysMeals = meals.filter(meal => {
     const today = new Date().toISOString().split('T')[0]
-    return meal.date === today && shouldShowMealToCustomer(meal.date, meal.cut_off_time)
+    // Show meals for today that are still within grace period OR any future meals
+    return (meal.date === today && shouldShowMealToCustomer(meal.date, meal.cut_off_time)) || meal.date > today
   })
   
   // Group meals by type
