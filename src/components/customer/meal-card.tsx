@@ -364,11 +364,11 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
         >
           {isOrdering 
             ? "Placing order..." 
+            : !isOrderingAllowed 
+            ? "Ordering Closed" 
             : !customAddress 
-            ? "No delivery address set" 
-            : isOrderingAllowed 
-            ? "Place Order" 
-            : "Ordering Closed"}
+            ? "Select Address to Order" 
+            : "Place Order"}
         </Button>
       </CardContent>
     </Card>
