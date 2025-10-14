@@ -1,5 +1,19 @@
 // Time utility functions for the tiffin service
 
+export function getTodayISTDateString(): string {
+  // Get current date in IST timezone (Asia/Kolkata)
+  const istDate = new Date().toLocaleString("en-US", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+  
+  // Parse the MM/DD/YYYY format and convert to YYYY-MM-DD
+  const [month, day, year] = istDate.split('/')
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+}
+
 export function getCurrentTime(): string {
   return new Date().toLocaleTimeString("en-IN", {
     hour: "2-digit",

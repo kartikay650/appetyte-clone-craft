@@ -19,7 +19,7 @@ import {
 import { Plus, IndianRupee, Clock, Pencil, Trash2 } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { formatTime, formatDate, isMealEditable } from "@/lib/utils/time"
+import { formatTime, formatDate, isMealEditable, getTodayISTDateString } from "@/lib/utils/time"
 
 interface Meal {
   id: string
@@ -44,7 +44,7 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
   const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
   const [deleteConfirmMealId, setDeleteConfirmMealId] = useState<string | null>(null)
   const [newMeal, setNewMeal] = useState({
-    date: new Date().toISOString().split("T")[0],
+    date: getTodayISTDateString(),
     meal_type: "breakfast" as const,
     option_1: "",
     option_2: "",
@@ -132,7 +132,7 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
     }
 
     setNewMeal({
-      date: new Date().toISOString().split("T")[0],
+      date: getTodayISTDateString(),
       meal_type: "breakfast",
       option_1: "",
       option_2: "",
@@ -185,7 +185,7 @@ export function MealManagement({ meals, onMealUpdate }: MealManagementProps) {
     setEditingMeal(null)
     setShowAddForm(false)
     setNewMeal({
-      date: new Date().toISOString().split("T")[0],
+      date: getTodayISTDateString(),
       meal_type: "breakfast",
       option_1: "",
       option_2: "",
