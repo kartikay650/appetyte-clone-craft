@@ -29,31 +29,21 @@ export function CustomerAuth({ providerId }: CustomerAuthProps) {
     setIsLoading(true)
 
     try {
-      // Create Supabase auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Create Supabase auth user with metadata for automatic customer creation
+      const { error: authError } = await supabase.auth.signUp({
         email: signupEmail,
         password: signupPassword,
         options: {
           emailRedirectTo: `${window.location.origin}${window.location.pathname}`,
+          data: {
+            name: signupName,
+            mobile_number: signupMobile,
+            provider_id: providerId,
+          },
         },
       })
 
       if (authError) throw authError
-      if (!authData.user) throw new Error("Failed to create user")
-
-      // Create customer record
-      const { error: customerError } = await supabase
-        .from("customers")
-        .insert({
-          id: authData.user.id,
-          name: signupName,
-          email: signupEmail,
-          mobile_number: signupMobile,
-          address: null,
-          provider_id: providerId,
-        })
-
-      if (customerError) throw customerError
 
       toast({
         title: "Account created!",
