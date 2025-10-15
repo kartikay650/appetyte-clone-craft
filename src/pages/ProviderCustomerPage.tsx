@@ -14,9 +14,10 @@ export default function ProviderCustomerPage() {
   useEffect(() => {
     const checkProviderAndAuth = async () => {
       // Check 1: Validate provider exists
+      // SECURITY: Only select safe, public fields - never expose email, phone, owner name, etc.
       const { data: provider, error } = await supabase
         .from('providers')
-        .select('id')
+        .select('id, sub_url, business_name')
         .eq('sub_url', subUrl)
         .maybeSingle()
 

@@ -19,7 +19,7 @@ export default function ProviderAdminPage() {
 
       const { data: provider, error } = await (supabase as any)
         .from('providers')
-        .select('*')
+        .select('id, sub_url, business_name')
         .eq('sub_url', subUrl)
         .eq('id', user.id)
         .maybeSingle()
