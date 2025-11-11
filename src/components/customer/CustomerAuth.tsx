@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Info } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
 interface CustomerAuthProps {
@@ -19,6 +22,7 @@ export function CustomerAuth({ providerId }: CustomerAuthProps) {
   const [signupEmail, setSignupEmail] = useState("")
   const [signupPassword, setSignupPassword] = useState("")
   const [signupMobile, setSignupMobile] = useState("")
+  const [isSubscriber, setIsSubscriber] = useState(false)
   
   // Login state
   const [loginEmail, setLoginEmail] = useState("")
@@ -45,9 +49,29 @@ export function CustomerAuth({ providerId }: CustomerAuthProps) {
 
       if (authError) throw authError
 
+      // If subscriber, create subscription request
+      if (isSubscriber) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { error: requestError } = await supabase
+            .from('subscription_requests')
+            .insert({
+              customer_id: user.id,
+              provider_id: providerId,
+              status: 'pending'
+            })
+
+          if (requestError) {
+            console.error('Subscription request error:', requestError)
+          }
+        }
+      }
+
       toast({
         title: "Account created!",
-        description: "You can now order meals from your provider.",
+        description: isSubscriber 
+          ? "Your subscription request has been sent to the admin for review."
+          : "You can now order meals from your provider.",
       })
 
       // Clear form
@@ -55,6 +79,7 @@ export function CustomerAuth({ providerId }: CustomerAuthProps) {
       setSignupEmail("")
       setSignupPassword("")
       setSignupMobile("")
+      setIsSubscriber(false)
     } catch (error: any) {
       toast({
         title: "Signup failed",
@@ -178,6 +203,29 @@ export function CustomerAuth({ providerId }: CustomerAuthProps) {
                     minLength={6}
                   />
                 </div>
+                
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="subscriber"
+                      checked={isSubscriber}
+                      onCheckedChange={(checked) => setIsSubscriber(checked as boolean)}
+                    />
+                    <Label htmlFor="subscriber" className="cursor-pointer font-medium">
+                      Are you a subscriber?
+                    </Label>
+                  </div>
+                  
+                  {isSubscriber && (
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertDescription className="text-sm">
+                        If you are subscribed to a meal plan, your request will be sent to admin for verification.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Sign Up"}
                 </Button>

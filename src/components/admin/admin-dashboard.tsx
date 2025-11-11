@@ -7,6 +7,7 @@ import { ReportsOverview } from "./reports-overview"
 import { TimeStatusWidget } from "./time-status-widget"
 import { RealTimeNotifications } from "./real-time-notifications"
 import { ProviderDeliverySettings } from "./provider-delivery-settings"
+import { SubscriptionManagement } from "./subscription-management"
 import { supabase } from "@/integrations/supabase/client"
 
 interface Meal {
@@ -116,10 +117,11 @@ export function AdminDashboard() {
       <TimeStatusWidget />
 
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="meals">Meals</TabsTrigger>
           <TabsTrigger value="customers">Customers</TabsTrigger>
+          <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
@@ -134,6 +136,10 @@ export function AdminDashboard() {
 
         <TabsContent value="customers">
           <CustomerManagement customers={customers} onCustomerUpdate={loadData} />
+        </TabsContent>
+
+        <TabsContent value="subscriptions">
+          {providerId && <SubscriptionManagement providerId={providerId} />}
         </TabsContent>
 
         <TabsContent value="reports">

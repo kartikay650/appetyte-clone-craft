@@ -5,6 +5,9 @@ import { OrderHistory } from "./order-history"
 import { BalanceCard } from "./balance-card"
 import { PaymentHistory } from "./payment-history"
 import { CustomerHeader } from "./CustomerHeader"
+import { PendingApproval } from "@/components/dashboard/PendingApproval"
+import { SubscriptionDashboard } from "@/components/dashboard/SubscriptionDashboard"
+import { useSubscription } from "@/hooks/useSubscription"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "@/hooks/use-toast"
 import { shouldShowMealToCustomer } from "@/lib/utils/time"
@@ -49,6 +52,7 @@ interface CustomerDashboardProps {
 }
 
 export function CustomerDashboard({ providerId, customerId }: CustomerDashboardProps) {
+  const { subscription, status, isLoading: subLoading } = useSubscription(customerId, providerId);
   const [meals, setMeals] = useState<Meal[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [payments, setPayments] = useState<Payment[]>([])
@@ -236,13 +240,65 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
     }
   }, [providerId, customerId])
 
-  if (isLoading) {
+  const handleBalanceUpdate = async () => {
+    const { data } = await supabase
+      .from('customers')
+      .select('current_balance')
+      .eq('id', customerId)
+      .single()
+    
+    if (data) {
+      setBalance(data.current_balance)
+    }
+  }
+
+  if (isLoading || subLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading meals...</p>
+          <p>Loading...</p>
         </div>
+      </div>
+    )
+  }
+
+  // Show pending approval screen if subscription request is pending
+  if (status === 'pending') {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <CustomerHeader customerId={customerId} providerId={providerId} />
+        <PendingApproval />
+      </div>
+    )
+  }
+
+  // Show subscription dashboard if user has active subscription
+  if (status === 'active' && subscription) {
+    return (
+      <div className="space-y-4 sm:space-y-6">
+        <CustomerHeader customerId={customerId} providerId={providerId} />
+        <SubscriptionDashboard 
+          subscription={subscription} 
+          customerId={customerId} 
+          providerId={providerId} 
+        />
+        
+        <Tabs defaultValue="history" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="history">History</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="history" className="mt-4">
+            <OrderHistory orders={orders} />
+          </TabsContent>
+
+          <TabsContent value="payments" className="space-y-4 mt-4">
+            <BalanceCard balance={balance} onBalanceUpdate={handleBalanceUpdate} />
+            <PaymentHistory payments={payments as any} />
+          </TabsContent>
+        </Tabs>
       </div>
     )
   }
@@ -263,18 +319,6 @@ export function CustomerDashboard({ providerId, customerId }: CustomerDashboardP
   // Find existing orders for today's meals
   const getExistingOrder = (mealId: string) => {
     return orders.find(order => order.meal_id === mealId)
-  }
-
-  const handleBalanceUpdate = async () => {
-    const { data } = await supabase
-      .from('customers')
-      .select('current_balance')
-      .eq('id', customerId)
-      .single()
-    
-    if (data) {
-      setBalance(data.current_balance)
-    }
   }
 
   return (

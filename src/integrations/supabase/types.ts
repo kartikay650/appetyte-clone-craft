@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           current_balance: number
           email: string | null
+          has_subscription: boolean | null
           id: string
           mobile_number: string
           name: string
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string
           current_balance?: number
           email?: string | null
+          has_subscription?: boolean | null
           id?: string
           mobile_number: string
           name: string
@@ -40,6 +42,7 @@ export type Database = {
           created_at?: string
           current_balance?: number
           email?: string | null
+          has_subscription?: boolean | null
           id?: string
           mobile_number?: string
           name?: string
@@ -49,6 +52,7 @@ export type Database = {
       }
       meals: {
         Row: {
+          cancel_cutoff_time: string | null
           created_at: string
           cut_off_time: string
           date: string
@@ -60,6 +64,7 @@ export type Database = {
           provider_id: string
         }
         Insert: {
+          cancel_cutoff_time?: string | null
           created_at?: string
           cut_off_time: string
           date: string
@@ -71,6 +76,7 @@ export type Database = {
           provider_id: string
         }
         Update: {
+          cancel_cutoff_time?: string | null
           created_at?: string
           cut_off_time?: string
           date?: string
@@ -216,6 +222,138 @@ export type Database = {
           sub_url?: string
         }
         Relationships: []
+      }
+      subscription_requests: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          provider_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          provider_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          provider_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_requests_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_skips: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          meal_type: string
+          skip_date: string
+          subscription_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          meal_type: string
+          skip_date: string
+          subscription_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          meal_type?: string
+          skip_date?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_skips_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_skips_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          active: boolean
+          auto_order: boolean
+          created_at: string
+          customer_id: string
+          end_date: string
+          id: string
+          meal_types: string[]
+          provider_id: string
+          start_date: string
+        }
+        Insert: {
+          active?: boolean
+          auto_order?: boolean
+          created_at?: string
+          customer_id: string
+          end_date: string
+          id?: string
+          meal_types: string[]
+          provider_id: string
+          start_date: string
+        }
+        Update: {
+          active?: boolean
+          auto_order?: boolean
+          created_at?: string
+          customer_id?: string
+          end_date?: string
+          id?: string
+          meal_types?: string[]
+          provider_id?: string
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       transactions: {
         Row: {
