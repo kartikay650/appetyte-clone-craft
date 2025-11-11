@@ -12,6 +12,7 @@ export interface Subscription {
   active: boolean;
   auto_order: boolean;
   created_at: string;
+  delivery_address_ids: Record<string, string>;
 }
 
 export interface SubscriptionRequest {
@@ -39,6 +40,23 @@ export function useSubscription(customerId: string, providerId: string) {
       if (error) throw error;
       return data as Subscription | null;
     },
+  });
+
+  const { data: canceledDays = [] } = useQuery({
+    queryKey: ['subscription-skips-count', customerId, providerId],
+    queryFn: async () => {
+      if (!subscription) return [];
+      
+      const { data, error } = await supabase
+        .from('subscription_skips')
+        .select('*')
+        .eq('subscription_id', subscription.id)
+        .eq('customer_id', customerId);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!subscription,
   });
 
   const { data: request, isLoading: requestLoading } = useQuery({
@@ -127,6 +145,7 @@ export function useSubscription(customerId: string, providerId: string) {
     createRequest,
     skipMeal,
     daysLeft: getDaysLeft(),
+    canceledDaysCount: canceledDays.length,
     status: subscription ? 'active' : request ? 'pending' : 'none'
   };
 }

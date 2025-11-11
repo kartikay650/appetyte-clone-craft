@@ -10,9 +10,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { Search, Eye, CalendarCheck, CalendarX, UserCheck } from "lucide-react";
+import { Search, Eye, CalendarCheck, CalendarX, UserCheck, MapPin, ChevronDown } from "lucide-react";
+import type { DeliveryAddress } from "./delivery-address-management";
 
 interface Customer {
   id: string;
@@ -37,7 +40,15 @@ interface Subscription {
   end_date: string;
   active: boolean;
   auto_order: boolean;
+  delivery_address_ids: Record<string, string>;
   customers: Customer;
+}
+
+interface SubscriptionSkip {
+  id: string;
+  subscription_id: string;
+  skip_date: string;
+  meal_type: string;
 }
 
 export function SubscriptionManagement({ providerId }: { providerId: string }) {
@@ -47,8 +58,24 @@ export function SubscriptionManagement({ providerId }: { providerId: string }) {
   const [detailsDialog, setDetailsDialog] = useState<{ open: boolean; subscription?: Subscription }>({ open: false });
   
   const [selectedMealTypes, setSelectedMealTypes] = useState<string[]>([]);
+  const [selectedAddresses, setSelectedAddresses] = useState<Record<string, string>>({});
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  // Fetch delivery addresses
+  const { data: deliveryAddresses = [] } = useQuery({
+    queryKey: ['delivery-addresses', providerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('delivery_addresses')
+        .select('*')
+        .eq('provider_id', providerId)
+        .eq('active', true);
+
+      if (error) throw error;
+      return data as DeliveryAddress[];
+    },
+  });
 
   // Fetch pending requests
   const { data: pendingRequests = [] } = useQuery({
@@ -111,7 +138,8 @@ export function SubscriptionManagement({ providerId }: { providerId: string }) {
           start_date: startDate,
           end_date: endDate,
           active: true,
-          auto_order: true
+          auto_order: true,
+          delivery_address_ids: selectedAddresses
         });
 
       if (subError) throw subError;
@@ -138,6 +166,7 @@ export function SubscriptionManagement({ providerId }: { providerId: string }) {
       toast.success('Subscription approved successfully');
       setReviewDialog({ open: false });
       setSelectedMealTypes([]);
+      setSelectedAddresses({});
       setStartDate("");
       setEndDate("");
     },
@@ -196,6 +225,14 @@ export function SubscriptionManagement({ providerId }: { providerId: string }) {
       toast.error('Please select start and end dates');
       return;
     }
+    
+    // Validate that all selected meals have addresses
+    for (const mealType of selectedMealTypes) {
+      if (!selectedAddresses[mealType]) {
+        toast.error(`Please select a delivery address for ${mealType}`);
+        return;
+      }
+    }
 
     approveMutation.mutate({
       requestId: reviewDialog.request.id,
@@ -219,6 +256,28 @@ export function SubscriptionManagement({ providerId }: { providerId: string }) {
   const filteredActive = activeSubscriptions.filter(sub =>
     sub.customers.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const getAddressName = (addressId: string) => {
+    const address = deliveryAddresses.find(a => a.id === addressId);
+    return address ? address.name : 'Not set';
+  };
+
+  // Get canceled days count for a subscription
+  const getCanceledDaysCount = (subscriptionId: string) => {
+    const { data: skips = [] } = useQuery({
+      queryKey: ['subscription-skips', subscriptionId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('subscription_skips')
+          .select('id')
+          .eq('subscription_id', subscriptionId);
+
+        if (error) throw error;
+        return data;
+      },
+    });
+    return skips.length;
+  };
 
   return (
     <div className="space-y-6">
@@ -401,7 +460,7 @@ export function SubscriptionManagement({ providerId }: { providerId: string }) {
 
       {/* Review Dialog */}
       <Dialog open={reviewDialog.open} onOpenChange={(open) => setReviewDialog({ open })}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Review Subscription Request</DialogTitle>
             <DialogDescription>
@@ -411,24 +470,53 @@ export function SubscriptionManagement({ providerId }: { providerId: string }) {
           
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Select Meal Types</Label>
-              <div className="space-y-2">
+              <Label>Select Meal Types & Delivery Addresses</Label>
+              <div className="space-y-3">
                 {['breakfast', 'lunch', 'dinner'].map((meal) => (
-                  <div key={meal} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={meal}
-                      checked={selectedMealTypes.includes(meal)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setSelectedMealTypes([...selectedMealTypes, meal]);
-                        } else {
-                          setSelectedMealTypes(selectedMealTypes.filter(m => m !== meal));
-                        }
-                      }}
-                    />
-                    <Label htmlFor={meal} className="capitalize cursor-pointer">
-                      {meal}
-                    </Label>
+                  <div key={meal} className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={meal}
+                        checked={selectedMealTypes.includes(meal)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedMealTypes([...selectedMealTypes, meal]);
+                          } else {
+                            setSelectedMealTypes(selectedMealTypes.filter(m => m !== meal));
+                            const newAddresses = { ...selectedAddresses };
+                            delete newAddresses[meal];
+                            setSelectedAddresses(newAddresses);
+                          }
+                        }}
+                      />
+                      <Label htmlFor={meal} className="capitalize cursor-pointer flex-1">
+                        {meal}
+                      </Label>
+                    </div>
+                    {selectedMealTypes.includes(meal) && (
+                      <div className="ml-6">
+                        <Select
+                          value={selectedAddresses[meal] || ""}
+                          onValueChange={(value) => {
+                            setSelectedAddresses({ ...selectedAddresses, [meal]: value });
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select delivery address" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {deliveryAddresses.map((address) => (
+                              <SelectItem key={address.id} value={address.id}>
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-4 w-4" />
+                                  <span>{address.name}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -486,10 +574,16 @@ export function SubscriptionManagement({ providerId }: { providerId: string }) {
                 <p className="font-medium">{detailsDialog.subscription.customers.email}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Meal Types</Label>
-                <div className="flex gap-2 mt-1">
+                <Label className="text-muted-foreground">Meal Types & Delivery Addresses</Label>
+                <div className="space-y-2 mt-2">
                   {detailsDialog.subscription.meal_types.map(type => (
-                    <Badge key={type} className="capitalize">{type}</Badge>
+                    <div key={type} className="flex items-center justify-between p-3 rounded-lg border bg-card">
+                      <Badge className="capitalize">{type}</Badge>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>{getAddressName(detailsDialog.subscription.delivery_address_ids?.[type])}</span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>

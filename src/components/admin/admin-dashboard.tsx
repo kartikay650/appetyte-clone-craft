@@ -8,6 +8,7 @@ import { TimeStatusWidget } from "./time-status-widget"
 import { RealTimeNotifications } from "./real-time-notifications"
 import { ProviderDeliverySettings } from "./provider-delivery-settings"
 import { SubscriptionManagement } from "./subscription-management"
+import { DeliveryAddressManagement } from "./delivery-address-management"
 import { supabase } from "@/integrations/supabase/client"
 
 interface Meal {
@@ -139,7 +140,12 @@ export function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="subscriptions">
-          {providerId && <SubscriptionManagement providerId={providerId} />}
+          {providerId && (
+            <div className="space-y-6">
+              <DeliveryAddressManagement providerId={providerId} />
+              <SubscriptionManagement providerId={providerId} />
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="reports">

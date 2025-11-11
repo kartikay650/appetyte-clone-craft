@@ -3,10 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useSubscription, Subscription } from "@/hooks/useSubscription";
-import { CalendarDays, UtensilsCrossed, Ban } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { CalendarDays, UtensilsCrossed, Ban, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useState } from "react";
+import { CanceledOrders } from "./CanceledOrders";
+import type { DeliveryAddress } from "@/components/admin/delivery-address-management";
 
 interface SubscriptionDashboardProps {
   subscription: Subscription;
@@ -19,8 +23,27 @@ export function SubscriptionDashboard({
   customerId, 
   providerId 
 }: SubscriptionDashboardProps) {
-  const { daysLeft, skipMeal } = useSubscription(customerId, providerId);
+  const { daysLeft, skipMeal, canceledDaysCount } = useSubscription(customerId, providerId);
   const [isSkipping, setIsSkipping] = useState(false);
+
+  const { data: deliveryAddresses = [] } = useQuery({
+    queryKey: ['delivery-addresses', providerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('delivery_addresses')
+        .select('*')
+        .eq('provider_id', providerId)
+        .eq('active', true);
+
+      if (error) throw error;
+      return data as DeliveryAddress[];
+    },
+  });
+
+  const getAddressName = (addressId: string) => {
+    const address = deliveryAddresses.find(a => a.id === addressId);
+    return address ? address.name : 'Not set';
+  };
 
   const totalDays = Math.ceil(
     (new Date(subscription.end_date).getTime() - new Date(subscription.start_date).getTime()) / 
@@ -73,16 +96,33 @@ export function SubscriptionDashboard({
           <div className="pt-4 border-t">
             <p className="text-sm font-medium mb-3 flex items-center gap-2">
               <UtensilsCrossed className="h-4 w-4" />
-              Subscribed Meals:
+              Subscribed Meals & Delivery Addresses:
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="space-y-3">
               {subscription.meal_types.map((type) => (
-                <Badge key={type} variant="outline" className="capitalize">
-                  {type}
-                </Badge>
+                <div key={type} className="flex items-center justify-between p-3 rounded-lg border bg-card">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="capitalize">
+                      {type}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{getAddressName(subscription.delivery_address_ids?.[type])}</span>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
+
+          {canceledDaysCount > 0 && (
+            <div className="pt-4 border-t">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Canceled Days</span>
+                <Badge variant="secondary">{canceledDaysCount}</Badge>
+              </div>
+            </div>
+          )}
 
           {subscription.auto_order && (
             <div className="pt-4 border-t">
@@ -108,6 +148,8 @@ export function SubscriptionDashboard({
           )}
         </CardContent>
       </Card>
+
+      <CanceledOrders customerId={customerId} subscriptionId={subscription.id} />
     </div>
   );
 }

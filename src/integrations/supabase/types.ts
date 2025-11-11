@@ -50,6 +50,33 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_addresses: {
+        Row: {
+          active: boolean
+          address: string
+          created_at: string
+          id: string
+          name: string
+          provider_id: string
+        }
+        Insert: {
+          active?: boolean
+          address: string
+          created_at?: string
+          id?: string
+          name: string
+          provider_id: string
+        }
+        Update: {
+          active?: boolean
+          address?: string
+          created_at?: string
+          id?: string
+          name?: string
+          provider_id?: string
+        }
+        Relationships: []
+      }
       meals: {
         Row: {
           cancel_cutoff_time: string | null
@@ -310,6 +337,7 @@ export type Database = {
           auto_order: boolean
           created_at: string
           customer_id: string
+          delivery_address_ids: Json | null
           end_date: string
           id: string
           meal_types: string[]
@@ -321,6 +349,7 @@ export type Database = {
           auto_order?: boolean
           created_at?: string
           customer_id: string
+          delivery_address_ids?: Json | null
           end_date: string
           id?: string
           meal_types: string[]
@@ -332,6 +361,7 @@ export type Database = {
           auto_order?: boolean
           created_at?: string
           customer_id?: string
+          delivery_address_ids?: Json | null
           end_date?: string
           id?: string
           meal_types?: string[]
