@@ -20,6 +20,7 @@ interface Order {
   status: string
   amount: number
   timestamp: string
+  customer_name?: string
 }
 
 interface OrderManagementProps {
@@ -158,7 +159,7 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
                   <div>
                     <CardTitle className="text-base flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      Order {order.id.slice(0, 8)}
+                      {order.customer_name ?? `Order #${order.id.slice(0, 8)}`}
                     </CardTitle>
                     <CardDescription className="flex items-center gap-4 mt-1">
                       <span className="flex items-center gap-1">
