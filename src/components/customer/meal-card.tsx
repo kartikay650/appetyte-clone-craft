@@ -6,11 +6,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Clock, IndianRupee, AlertTriangle, MapPin, CheckCircle } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Clock, IndianRupee, AlertTriangle, MapPin, CheckCircle, XCircle } from "lucide-react"
 import { useOrderingStatus } from "@/hooks/use-time-updates"
 import { formatTime } from "@/lib/utils/time"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "@/hooks/use-toast"
+import { differenceInMinutes, parse, format } from "date-fns"
 import type { DeliveryAddress } from "@/components/admin/delivery-address-management"
 
 interface Meal {
@@ -48,6 +50,7 @@ interface MealCardProps {
 export function MealCard({ meal, customerId, providerId, existingOrder, deliveryAddress }: MealCardProps) {
   const [selectedOption, setSelectedOption] = useState(meal.option_1)
   const [isOrdering, setIsOrdering] = useState(false)
+  const [isCanceling, setIsCanceling] = useState(false)
   const [notes, setNotes] = useState("")
   const [showNotes, setShowNotes] = useState(false)
   const [customAddress, setCustomAddress] = useState(deliveryAddress || "")
@@ -58,7 +61,19 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
   const { isOrderingAllowed, timeUntilCutoff } = useOrderingStatus(meal.cut_off_time, meal.date)
   
   // Check if customer has already ordered this meal
-  const hasOrdered = !!existingOrder
+  const hasOrdered = !!existingOrder && existingOrder.status !== 'canceled'
+  
+  // Calculate if cancellation is allowed (more than 15 minutes before cutoff)
+  const canCancel = () => {
+    if (!existingOrder || existingOrder.status === 'canceled') return false
+    
+    const now = new Date()
+    const mealDate = new Date(meal.date)
+    const cutoffTime = parse(meal.cut_off_time, "HH:mm:ss", mealDate)
+    const minutesUntilCutoff = differenceInMinutes(cutoffTime, now)
+    
+    return minutesUntilCutoff > 15
+  }
 
   // Fetch delivery settings and addresses
   useEffect(() => {
@@ -209,10 +224,69 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
     }
   }
 
-  // STATE 1: Already Ordered - Show order details
-  if (hasOrdered) {
+  const handleCancelOrder = async () => {
+    if (!existingOrder) return
+    
+    setIsCanceling(true)
+    try {
+      const { error } = await supabase
+        .from("orders")
+        .update({ 
+          status: "canceled",
+          canceled_at: new Date().toISOString()
+        })
+        .eq("id", existingOrder.id)
+
+      if (error) throw error
+
+      // Refund the amount to customer balance using RPC
+      const { error: balanceError } = await supabase.rpc('increment_balance', {
+        customer_id: customerId,
+        amount: existingOrder.amount
+      })
+
+      if (balanceError) {
+        console.error("Balance update error:", balanceError)
+        // Continue even if balance update fails - the order is already canceled
+      }
+
+      // Log refund transaction
+      await supabase
+        .from("transactions")
+        .insert({
+          customer_id: customerId,
+          provider_id: providerId,
+          amount: existingOrder.amount,
+          type: "refund",
+          order_id: existingOrder.id,
+          metadata: { reason: "order_canceled" }
+        })
+
+      toast({
+        title: "Order canceled",
+        description: "Your meal has been canceled successfully and amount refunded.",
+      })
+      
+      // Refresh the page to show updated status
+      window.location.reload()
+    } catch (error) {
+      console.error("Error canceling order:", error)
+      toast({
+        title: "Error",
+        description: "Failed to cancel order. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsCanceling(false)
+    }
+  }
+
+  // STATE 1: Already Ordered or Canceled - Show order details
+  if (existingOrder) {
+    const isCanceled = existingOrder.status === 'canceled'
+    
     return (
-      <Card className="bg-muted/30">
+      <Card className={isCanceled ? "bg-red-50/50 dark:bg-red-950/20" : "bg-muted/30"}>
         <CardHeader className="pb-3 sm:pb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex-1">
@@ -221,8 +295,17 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
                 <Badge className={`${getMealTypeColor(meal.meal_type)} text-xs`}>{meal.meal_type}</Badge>
               </CardTitle>
               <CardDescription className="flex items-center gap-1 mt-2 text-xs sm:text-sm">
-                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
-                Order placed
+                {isCanceled ? (
+                  <>
+                    <XCircle className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+                    Order canceled
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+                    Order placed
+                  </>
+                )}
               </CardDescription>
             </div>
             <Badge className={`${getStatusColor(existingOrder.status)} text-xs`}>
@@ -232,12 +315,23 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
         </CardHeader>
 
         <CardContent className="space-y-3">
-          <div className="bg-background rounded-lg p-3 space-y-2">
+          <div className={`rounded-lg p-3 space-y-2 ${isCanceled ? "bg-background/60" : "bg-background"}`}>
             <div className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+              {isCanceled ? (
+                <XCircle className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+              ) : (
+                <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+              )}
               <div className="flex-1">
-                <p className="text-sm font-medium">You ordered: {existingOrder.selected_option}</p>
+                <p className="text-sm font-medium">
+                  {isCanceled ? "Canceled order:" : "You ordered:"} {existingOrder.selected_option}
+                </p>
                 <p className="text-xs text-muted-foreground mt-1">Amount: ₹{existingOrder.amount}</p>
+                {isCanceled && (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                    Refunded to your account
+                  </p>
+                )}
               </div>
             </div>
             
@@ -259,6 +353,31 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
               </div>
             )}
           </div>
+          
+          {!isCanceled && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="w-full">
+                    <Button
+                      onClick={handleCancelOrder}
+                      disabled={!canCancel() || isCanceling}
+                      variant="destructive"
+                      size="sm"
+                      className="w-full"
+                    >
+                      {isCanceling ? "Canceling..." : "Cancel Meal"}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {!canCancel() && (
+                  <TooltipContent>
+                    <p>Cancellation not allowed after cutoff time (15 min before)</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </CardContent>
       </Card>
     )
