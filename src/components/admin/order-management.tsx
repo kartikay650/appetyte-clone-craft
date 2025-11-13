@@ -3,10 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { IndianRupee, Clock, User, MapPin } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { formatDate } from "@/lib/utils/time"
+import { CanceledOrdersView } from "@/components/dashboard/CanceledOrdersView"
 
 interface Order {
   id: string
@@ -26,6 +28,16 @@ interface OrderManagementProps {
 }
 
 export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps) {
+  const [providerId, setProviderId] = useState<string | null>(null)
+  
+  // Get provider ID on mount
+  React.useEffect(() => {
+    const getProviderId = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) setProviderId(user.id)
+    }
+    getProviderId()
+  }, [])
   const { toast } = useToast()
   const [filterStatus, setFilterStatus] = useState<string>("all")
 
@@ -39,6 +51,8 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
         return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
       case "delivered":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+      case "canceled":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
     }
@@ -67,7 +81,7 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
   }
 
   const filteredOrders = orders.filter((order) => {
-    if (filterStatus === "all") return true
+    if (filterStatus === "all") return order.status !== "canceled"
     return order.status === filterStatus
   })
 
@@ -82,7 +96,13 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
   })
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="active" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="active">Active Orders</TabsTrigger>
+        <TabsTrigger value="canceled">Canceled Orders</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="active" className="space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -198,6 +218,11 @@ export function OrderManagement({ orders, onOrderUpdate }: OrderManagementProps)
           </Card>
         )}
       </div>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="canceled">
+        {providerId && <CanceledOrdersView providerId={providerId} />}
+      </TabsContent>
+    </Tabs>
   )
 }
