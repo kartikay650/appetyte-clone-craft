@@ -3,12 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { MealManagement } from "./meal-management"
 import { OrderManagement } from "./order-management"
 import { CustomerManagement } from "./customer-management"
-import { ReportsOverview } from "./reports-overview"
+import { ReportsOverview as ReportsOverviewOld } from "./reports-overview"
 import { TimeStatusWidget } from "./time-status-widget"
 import { RealTimeNotifications } from "./real-time-notifications"
 import { ProviderDeliverySettings } from "./provider-delivery-settings"
 import { SubscriptionManagement } from "./subscription-management"
 import { DeliveryAddressManagement } from "./delivery-address-management"
+import { ReportsOverview } from "@/components/reports/ReportsOverview"
 import { supabase } from "@/integrations/supabase/client"
 
 interface Meal {
@@ -118,11 +119,12 @@ export function AdminDashboard() {
       <TimeStatusWidget />
 
       <Tabs defaultValue="orders" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="orders">Orders</TabsTrigger>
           <TabsTrigger value="meals">Meals</TabsTrigger>
           <TabsTrigger value="customers">Customers</TabsTrigger>
           <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+          <TabsTrigger value="delivery">Delivery</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
@@ -140,16 +142,15 @@ export function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="subscriptions">
-          {providerId && (
-            <div className="space-y-6">
-              <DeliveryAddressManagement providerId={providerId} />
-              <SubscriptionManagement providerId={providerId} />
-            </div>
-          )}
+          {providerId && <SubscriptionManagement providerId={providerId} />}
+        </TabsContent>
+
+        <TabsContent value="delivery">
+          {providerId && <DeliveryAddressManagement providerId={providerId} />}
         </TabsContent>
 
         <TabsContent value="reports">
-          <ReportsOverview orders={orders} customers={customers} meals={meals} />
+          {providerId && <ReportsOverview providerId={providerId} />}
         </TabsContent>
 
         <TabsContent value="settings">
