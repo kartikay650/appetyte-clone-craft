@@ -44,6 +44,7 @@ interface Order {
   status: string
   amount: number
   timestamp: string
+  customer_name?: string
 }
 
 export function AdminDashboard() {
@@ -82,16 +83,21 @@ export function AdminDashboard() {
       .eq('provider_id', user.id)
       .order('created_at', { ascending: false })
     
-    // Fetch orders
+    // Fetch orders with customer names
     const { data: ordersData } = await (supabase as any)
       .from('orders')
-      .select('*')
+      .select('*, customers(name)')
       .eq('provider_id', user.id)
       .order('timestamp', { ascending: false })
 
     setMeals(mealsData || [])
     setCustomers(customersData || [])
-    setOrders(ordersData || [])
+    // Map orders to include customer_name
+    const ordersWithNames = (ordersData || []).map((order: any) => ({
+      ...order,
+      customer_name: order.customers?.name
+    }))
+    setOrders(ordersWithNames)
     setIsLoading(false)
   }
 
