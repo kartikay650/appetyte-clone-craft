@@ -5,11 +5,13 @@ import { Badge } from "@/components/ui/badge"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Clock, IndianRupee, AlertTriangle, MapPin, CheckCircle } from "lucide-react"
 import { useOrderingStatus } from "@/hooks/use-time-updates"
 import { formatTime } from "@/lib/utils/time"
 import { supabase } from "@/integrations/supabase/client"
 import { toast } from "@/hooks/use-toast"
+import type { DeliveryAddress } from "@/components/admin/delivery-address-management"
 
 interface Meal {
   id: string
@@ -50,37 +52,54 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
   const [showNotes, setShowNotes] = useState(false)
   const [customAddress, setCustomAddress] = useState(deliveryAddress || "")
   const [deliveryMode, setDeliveryMode] = useState<"custom" | "fixed">("custom")
-  const [fixedAddress, setFixedAddress] = useState("")
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("")
+  const [deliveryAddresses, setDeliveryAddresses] = useState<DeliveryAddress[]>([])
 
   const { isOrderingAllowed, timeUntilCutoff } = useOrderingStatus(meal.cut_off_time, meal.date)
   
   // Check if customer has already ordered this meal
   const hasOrdered = !!existingOrder
 
-  // Fetch delivery settings
+  // Fetch delivery settings and addresses
   useEffect(() => {
-    const fetchDeliverySettings = async () => {
+    const fetchDeliveryData = async () => {
       try {
-        const { data, error } = await supabase
+        // Fetch delivery mode
+        const { data: providerData, error: providerError } = await supabase
           .from("providers")
           .select("delivery_settings_json")
           .eq("id", providerId)
           .single()
 
-        if (error) throw error
+        if (providerError) throw providerError
 
-        const settings = (data?.delivery_settings_json as unknown || { mode: "custom" }) as { mode: "custom" | "fixed"; fixedAddress?: string }
+        const settings = (providerData?.delivery_settings_json as unknown || { mode: "custom" }) as { mode: "custom" | "fixed" }
         setDeliveryMode(settings.mode)
-        if (settings.mode === "fixed" && settings.fixedAddress) {
-          setFixedAddress(settings.fixedAddress)
-          setCustomAddress(settings.fixedAddress)
+
+        // If fixed mode, fetch addresses
+        if (settings.mode === "fixed") {
+          const { data: addressData, error: addressError } = await supabase
+            .from("delivery_addresses")
+            .select("*")
+            .eq("provider_id", providerId)
+            .eq("active", true)
+            .order("name")
+
+          if (addressError) throw addressError
+          setDeliveryAddresses(addressData || [])
+          
+          // Set first address as default if available
+          if (addressData && addressData.length > 0) {
+            setSelectedAddressId(addressData[0].id)
+            setCustomAddress(addressData[0].address)
+          }
         }
       } catch (error) {
-        console.error("Error fetching delivery settings:", error)
+        console.error("Error fetching delivery data:", error)
       }
     }
 
-    fetchDeliverySettings()
+    fetchDeliveryData()
   }, [providerId])
 
   const getMealTypeColor = (mealType: string) => {
@@ -126,7 +145,9 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
   }
 
   const handlePlaceOrder = async () => {
-    const finalAddress = deliveryMode === "fixed" ? fixedAddress : customAddress
+    const finalAddress = deliveryMode === "fixed" 
+      ? deliveryAddresses.find(addr => addr.id === selectedAddressId)?.address || ""
+      : customAddress
 
     if (!isOrderingAllowed) {
       toast({
@@ -324,14 +345,32 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
               />
             </div>
           ) : (
-            <div className="bg-muted rounded-lg p-3">
-              <div className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-xs text-muted-foreground">Delivery to:</p>
-                  <p className="text-sm">{fixedAddress}</p>
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="deliveryAddress">Select Delivery Address</Label>
+              <Select value={selectedAddressId} onValueChange={(value) => {
+                setSelectedAddressId(value)
+                const selectedAddr = deliveryAddresses.find(addr => addr.id === value)
+                if (selectedAddr) {
+                  setCustomAddress(selectedAddr.address)
+                }
+              }}>
+                <SelectTrigger id="deliveryAddress">
+                  <SelectValue placeholder="Choose delivery location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {deliveryAddresses.map((addr) => (
+                    <SelectItem key={addr.id} value={addr.id}>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <div>
+                          <div className="font-medium">{addr.name}</div>
+                          <div className="text-xs text-muted-foreground">{addr.address}</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>
