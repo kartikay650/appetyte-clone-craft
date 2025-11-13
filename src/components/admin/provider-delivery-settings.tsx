@@ -3,13 +3,12 @@ import { supabase } from "@/integrations/supabase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
+import { DeliveryAddressManagement } from "./delivery-address-management"
 
 interface DeliverySettings {
   mode: "custom" | "fixed"
-  fixedAddress?: string
 }
 
 interface ProviderDeliverySettingsProps {
@@ -18,7 +17,6 @@ interface ProviderDeliverySettingsProps {
 
 export function ProviderDeliverySettings({ providerId }: ProviderDeliverySettingsProps) {
   const [settings, setSettings] = useState<DeliverySettings>({ mode: "custom" })
-  const [fixedAddress, setFixedAddress] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -38,7 +36,6 @@ export function ProviderDeliverySettings({ providerId }: ProviderDeliverySetting
 
       const savedSettings = (data?.delivery_settings_json as unknown || { mode: "custom" }) as DeliverySettings
       setSettings(savedSettings)
-      setFixedAddress(savedSettings.fixedAddress || "")
     } catch (error) {
       console.error("Error fetching delivery settings:", error)
       toast({
@@ -56,7 +53,6 @@ export function ProviderDeliverySettings({ providerId }: ProviderDeliverySetting
     try {
       const newSettings: DeliverySettings = {
         mode: settings.mode,
-        ...(settings.mode === "fixed" && { fixedAddress }),
       }
 
       const { error } = await supabase
@@ -87,48 +83,42 @@ export function ProviderDeliverySettings({ providerId }: ProviderDeliverySetting
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Delivery Settings</CardTitle>
-        <CardDescription>
-          Configure how delivery addresses are handled for customer orders
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <RadioGroup
-          value={settings.mode}
-          onValueChange={(value) => setSettings({ ...settings, mode: value as "custom" | "fixed" })}
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="custom" id="custom" />
-            <Label htmlFor="custom" className="cursor-pointer">
-              Customer enters delivery address (Custom)
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="fixed" id="fixed" />
-            <Label htmlFor="fixed" className="cursor-pointer">
-              Fixed delivery location
-            </Label>
-          </div>
-        </RadioGroup>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Delivery Mode</CardTitle>
+          <CardDescription>
+            Choose how customers provide delivery addresses
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <RadioGroup
+            value={settings.mode}
+            onValueChange={(value) => setSettings({ ...settings, mode: value as "custom" | "fixed" })}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="custom" id="custom" />
+              <Label htmlFor="custom" className="cursor-pointer">
+                Customer enters custom delivery address
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="fixed" id="fixed" />
+              <Label htmlFor="fixed" className="cursor-pointer">
+                Fixed delivery locations (customers choose from predefined addresses)
+              </Label>
+            </div>
+          </RadioGroup>
 
-        {settings.mode === "fixed" && (
-          <div className="space-y-2">
-            <Label htmlFor="fixedAddress">Fixed Delivery Address</Label>
-            <Input
-              id="fixedAddress"
-              value={fixedAddress}
-              onChange={(e) => setFixedAddress(e.target.value)}
-              placeholder="Enter the fixed delivery address"
-            />
-          </div>
-        )}
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? "Saving..." : "Save Delivery Mode"}
+          </Button>
+        </CardContent>
+      </Card>
 
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Settings"}
-        </Button>
-      </CardContent>
-    </Card>
+      {settings.mode === "fixed" && (
+        <DeliveryAddressManagement providerId={providerId} />
+      )}
+    </div>
   )
 }
