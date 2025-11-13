@@ -239,15 +239,19 @@ export function MealCard({ meal, customerId, providerId, existingOrder, delivery
 
       if (error) throw error
 
-      // Refund the amount to customer balance using RPC
-      const { error: balanceError } = await supabase.rpc('increment_balance', {
-        customer_id: customerId,
-        amount: existingOrder.amount
-      })
+      // Get current balance and update it
+      const { data: customerData } = await supabase
+        .from("customers")
+        .select("current_balance")
+        .eq("id", customerId)
+        .single()
 
-      if (balanceError) {
-        console.error("Balance update error:", balanceError)
-        // Continue even if balance update fails - the order is already canceled
+      if (customerData) {
+        const newBalance = customerData.current_balance + existingOrder.amount
+        await supabase
+          .from("customers")
+          .update({ current_balance: newBalance })
+          .eq("id", customerId)
       }
 
       // Log refund transaction
