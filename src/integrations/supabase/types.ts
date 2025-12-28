@@ -119,6 +119,7 @@ export type Database = {
       orders: {
         Row: {
           amount: number
+          canceled_at: string | null
           customer_id: string
           delivery_address: string
           id: string
@@ -131,6 +132,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          canceled_at?: string | null
           customer_id: string
           delivery_address: string
           id?: string
@@ -143,6 +145,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          canceled_at?: string | null
           customer_id?: string
           delivery_address?: string
           id?: string
@@ -425,6 +428,10 @@ export type Database = {
     Functions: {
       ensure_customer_record: {
         Args: { p_provider_id: string; p_user_id: string }
+        Returns: undefined
+      }
+      increment_balance: {
+        Args: { amount: number; customer_id: string }
         Returns: undefined
       }
       place_order_atomic: {
